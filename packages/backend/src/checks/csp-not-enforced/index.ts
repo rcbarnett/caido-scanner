@@ -31,7 +31,7 @@ export default defineCheck<unknown>(({ step }) => {
 - Data injection attacks can inject unauthorized content
 - Clickjacking attacks can embed the application in malicious frames
 
-**Recommendation:** Implement a Content Security Policy header with appropriate directives to restrict resource loading and prevent code injection attacks.`,
+**Recommendation:** Add appropriate CSP directives to provide actual security protection.`,
         severity: Severity.HIGH,
         correlation: {
           requestID: context.target.request.getId(),
