@@ -4,5 +4,4 @@ export const
   CSP = 2,
   Directive = 3,
   DirectiveName = 4,
-  SourceList = 5,
-  SourceValue = 6
+  SourceValue = 5

@@ -104,5 +104,14 @@ describe("CSPParser", () => {
         ],
       });
     });
+
+    it("should handle CSP header with invalid directive", () => {
+      const cspHeader = "default-src 'self'; invalid-directive";
+      const result = CSPParser.parse(cspHeader);
+
+      expect(result).toMatchObject({
+        kind: "Failed",
+      });
+    });
   });
 });

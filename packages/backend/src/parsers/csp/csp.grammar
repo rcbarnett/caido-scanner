@@ -3,12 +3,12 @@
 }
 
 Directive {
-  DirectiveName SourceList? ";"
+  DirectiveName sourceList? ";"
 }
 
 DirectiveName { directiveName }
 
-SourceList {
+sourceList {
   SourceValue+
 }
 
@@ -24,9 +24,7 @@ SourceValue {
                   "trusted-types" | "upgrade-insecure-requests" | "block-all-mixed-content" |
                   "referrer" | "require-sri-for" | "sandbox" | "report-uri" | "report-to" }
 
-  keyword { "'self'" | "'unsafe-inline'" | "'unsafe-eval'" | "'unsafe-hashes'" | 
-            "'unsafe-allow-redirects'" | "'strict-dynamic'" | "'report-sample'" | 
-            "'none'" | "'wasm-unsafe-eval'" }
+  keyword { $[a-zA-Z0-9\-_\.\*\/\:']+ }
   
   
   Whitespace { $[ \t\n\r]+ }

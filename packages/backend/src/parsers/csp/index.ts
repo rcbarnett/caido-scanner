@@ -3,13 +3,10 @@
  * Parses CSP header values into structured data using Lezer parser
  */
 
-import { type TreeCursor } from "@lezer/common";
-
 import { parser } from "./__generated__.js";
 import {
   Directive,
   DirectiveName,
-  SourceList,
   SourceValue,
 } from "./__generated__.terms.js";
 
@@ -28,43 +25,6 @@ type ParserResult =
       kind: "Failed";
     };
 
-const extractDirective = (
-  cursor: TreeCursor,
-  cspHeader: string,
-): CSPDirective | undefined => {
-  const node = cursor.node;
-
-  // Get the directive name
-  const directiveNameNode = node.getChild(DirectiveName);
-  if (!directiveNameNode) return undefined;
-
-  const name = cspHeader.slice(directiveNameNode.from, directiveNameNode.to);
-  const values: string[] = [];
-
-  // Look for SourceList in the directive
-  const sourceListNode = node.getChild(SourceList);
-  if (sourceListNode) {
-    // Get all SourceValue nodes by walking through the tree
-    const firstChild = sourceListNode.firstChild;
-    let child = firstChild;
-    while (child) {
-      if (child.type && child.type.id === SourceValue) {
-        const value = cspHeader.slice(child.from, child.to);
-        // Filter out whitespace and empty values
-        if (value.trim() !== "") {
-          values.push(value);
-        }
-      }
-      child = child.nextSibling;
-    }
-  }
-
-  return {
-    name,
-    values,
-  };
-};
-
 const parse = (cspHeader: string): ParserResult => {
   if (!cspHeader || cspHeader.trim() === "") {
     return {
@@ -77,16 +37,37 @@ const parse = (cspHeader: string): ParserResult => {
   const tree = parser.parse(cspHeader);
   const directives: CSPDirective[] = [];
 
-  // Walk the tree to extract directives
-  const cursor = tree.cursor();
-  do {
-    if (cursor.type.id === Directive) {
-      const directive = extractDirective(cursor, cspHeader);
-      if (directive) {
-        directives.push(directive);
+  let isError = false;
+  tree.iterate({
+    enter: (node) => {
+      if (node.type.isError) {
+        isError = true;
       }
-    }
-  } while (cursor.next());
+
+      if (node.type.id === Directive) {
+        const directiveName = node.node.getChild(DirectiveName);
+        const values = node.node.getChildren(SourceValue);
+
+        if (directiveName) {
+          directives.push({
+            name: cspHeader.slice(
+              directiveName.node.from,
+              directiveName.node.to,
+            ),
+            values: values.map((value) =>
+              cspHeader.slice(value.node.from, value.node.to),
+            ),
+          });
+        }
+      }
+    },
+  });
+
+  if (isError) {
+    return {
+      kind: "Failed",
+    };
+  }
 
   return {
     kind: "Success",
