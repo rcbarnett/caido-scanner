@@ -1,7 +1,7 @@
 import { defineCheck, done, Severity } from "engine";
 
 import { CSPParser } from "../../parsers/csp";
-import { keyStrategy } from "../../utils";
+import { findingBuilder, keyStrategy } from "../../utils";
 
 export default defineCheck<unknown>(({ step }) => {
   step("checkCspUntrustedStyle", (state, context) => {
@@ -27,6 +27,11 @@ export default defineCheck<unknown>(({ step }) => {
     const cspValue = cspHeader[0] ?? "";
     const parsedCsp = CSPParser.parse(cspValue);
 
+    // Check if parsing was successful
+    if (parsedCsp.kind === "Failed") {
+      return done({ state });
+    }
+
     // Find style-src directive
     const styleSrcDirective = parsedCsp.directives.find(
       (d) => d.name === "style-src",
@@ -41,121 +46,39 @@ export default defineCheck<unknown>(({ step }) => {
       return done({ state });
     }
 
-    const findings = [];
+    // Collect all unsafe values found (excluding 'unsafe-eval' which is not relevant for styles)
+    const unsafeValues = effectiveDirective.values.filter((value) => {
+      return (
+        value === "'unsafe-inline'" ||
+        value === "*" ||
+        value.startsWith("data:") ||
+        value.startsWith("blob:")
+      );
+    });
 
-    // Check for unsafe-inline in style-src
-    if (effectiveDirective.values.includes("'unsafe-inline'")) {
-      findings.push({
-        name: "Content security policy: allows untrusted style execution",
-        description: `The Content Security Policy allows inline styles with 'unsafe-inline', which can lead to CSS injection attacks.
-
-**CSP Header:** \`${cspValue}\`
-
-**Directive:** \`${effectiveDirective.name}\`
-
-**Unsafe Values:** \`'unsafe-inline'\`
-
-**Impact:** 
-- CSS injection attacks can steal sensitive data through CSS selectors
-- Malicious styles can be injected to modify page appearance
-- Data exfiltration through CSS-based attacks
-
-**Recommendation:** Remove 'unsafe-inline' from style-src and use nonces or hashes for inline styles, or move inline styles to external stylesheets.`,
-        severity: Severity.MEDIUM,
-        correlation: {
-          requestID: context.target.request.getId(),
-          locations: [],
-        },
-      });
+    // If no unsafe values found, no finding
+    if (unsafeValues.length === 0) {
+      return done({ state });
     }
 
-    // Check for wildcard sources
-    if (effectiveDirective.values.includes("*")) {
-      findings.push({
-        name: "Content security policy: allows untrusted style execution",
-        description: `The Content Security Policy allows styles from any source with wildcard (*), which can lead to CSS injection attacks.
+    const finding = findingBuilder({
+      name: "Content security policy: allows untrusted style execution",
+      severity: Severity.INFO,
+      request: context.target.request,
+    })
+      .withDescription(
+        "The Content Security Policy allows untrusted style execution through unsafe directives in style-src or default-src.",
+      )
+      .withImpact(
+        "Unsafe style directives can lead to CSS injection attacks, allowing malicious styles to steal sensitive data through CSS selectors, modify page appearance, and perform data exfiltration.",
+      )
+      .withRecommendation(
+        "Remove unsafe directives like 'unsafe-inline', wildcards (*), and data:/blob: URLs from style-src. Use secure alternatives like nonces (nonce-RANDOM) with at least 8 characters.",
+      )
+      .withArtifacts("Unsafe Values", unsafeValues)
+      .build();
 
-**CSP Header:** \`${cspValue}\`
-
-**Directive:** \`${effectiveDirective.name}\`
-
-**Unsafe Values:** \`*\`
-
-**Impact:** 
-- Any external stylesheet can be loaded, including malicious ones
-- CSS injection attacks can steal sensitive data
-- Malicious styles can be injected from any domain
-
-**Recommendation:** Replace wildcard (*) with specific trusted domains or use 'self' for same-origin resources only.`,
-        severity: Severity.HIGH,
-        correlation: {
-          requestID: context.target.request.getId(),
-          locations: [],
-        },
-      });
-    }
-
-    // Check for data: and blob: sources
-    const unsafeSources = effectiveDirective.values.filter(
-      (value) => value.startsWith("data:") || value.startsWith("blob:"),
-    );
-
-    if (unsafeSources.length > 0) {
-      findings.push({
-        name: "Content security policy: allows untrusted style execution",
-        description: `The Content Security Policy allows styles from data: and blob: sources, which can lead to CSS injection attacks.
-
-**CSP Header:** \`${cspValue}\`
-
-**Directive:** \`${effectiveDirective.name}\`
-
-**Unsafe Sources:** \`${unsafeSources.join(", ")}\`
-
-**Impact:** 
-- Data URLs can contain malicious CSS
-- Blob URLs can be used to inject malicious styles
-- CSS injection attacks can steal sensitive data
-
-**Recommendation:** Remove data: and blob: sources from style-src unless absolutely necessary for legitimate use cases.`,
-        severity: Severity.MEDIUM,
-        correlation: {
-          requestID: context.target.request.getId(),
-          locations: [],
-        },
-      });
-    }
-
-    // Check for overly permissive sources (http: without https:)
-    const httpSources = effectiveDirective.values.filter(
-      (value) => value.startsWith("http:") && !value.startsWith("https:"),
-    );
-
-    if (httpSources.length > 0) {
-      findings.push({
-        name: "Content security policy: allows untrusted style execution",
-        description: `The Content Security Policy allows styles from HTTP sources, which can be intercepted and modified.
-
-**CSP Header:** \`${cspValue}\`
-
-**Directive:** \`${effectiveDirective.name}\`
-
-**HTTP Sources:** \`${httpSources.join(", ")}\`
-
-**Impact:** 
-- HTTP resources can be intercepted and modified by attackers
-- Man-in-the-middle attacks can inject malicious CSS
-- Insecure transmission of stylesheets
-
-**Recommendation:** Use HTTPS sources only or ensure HTTP sources are from trusted, internal networks.`,
-        severity: Severity.LOW,
-        correlation: {
-          requestID: context.target.request.getId(),
-          locations: [],
-        },
-      });
-    }
-
-    return done({ state, findings });
+    return done({ state, findings: [finding] });
   });
 
   return {
@@ -163,10 +86,16 @@ export default defineCheck<unknown>(({ step }) => {
       id: "csp-untrusted-style",
       name: "Content security policy: allows untrusted style execution",
       description:
-        "Checks for Content Security Policy directives that allow untrusted style execution, which can lead to CSS injection attacks",
+        "Mitigate CSS injection by avoiding 'unsafe-inline', data: URLs, and global wildcards in style directives. Use a secure, random nonce of at least 8 characters 'nonce-RANDOM' to prevent untrusted style execution.",
       type: "passive",
-      tags: ["csp", "security-headers", "css-injection", "style-src"],
-      severities: [Severity.LOW, Severity.MEDIUM, Severity.HIGH],
+      tags: [
+        "csp",
+        "security-headers",
+        "css-injection",
+        "style-src",
+        "injection",
+      ],
+      severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },
     initState: () => ({}),
