@@ -37,7 +37,7 @@ describe("CSP Form Hijacking Check", () => {
             findings: [
               {
                 name: "Content security policy: allows form hijacking",
-                severity: "medium",
+                severity: "info",
               },
             ],
             result: "done",
@@ -80,7 +80,7 @@ describe("CSP Form Hijacking Check", () => {
             findings: [
               {
                 name: "Content security policy: allows form hijacking",
-                severity: "high",
+                severity: "info",
               },
             ],
             result: "done",
@@ -123,7 +123,7 @@ describe("CSP Form Hijacking Check", () => {
             findings: [
               {
                 name: "Content security policy: allows form hijacking",
-                severity: "medium",
+                severity: "info",
               },
             ],
             result: "done",
@@ -166,7 +166,7 @@ describe("CSP Form Hijacking Check", () => {
             findings: [
               {
                 name: "Content security policy: allows form hijacking",
-                severity: "low",
+                severity: "info",
               },
             ],
             result: "done",
@@ -176,7 +176,7 @@ describe("CSP Form Hijacking Check", () => {
     ]);
   });
 
-  it("should find no issues with secure form-action", async () => {
+  it("should find no issues with form-action 'self'", async () => {
     const request = createMockRequest({
       id: "5",
       host: "example.com",
@@ -189,7 +189,7 @@ describe("CSP Form Hijacking Check", () => {
       code: 200,
       headers: {
         "content-type": ["text/html"],
-        "content-security-policy": ["form-action 'self' https://trusted.com"],
+        "content-security-policy": ["form-action 'self'"],
       },
       body: "<html><body>Test</body></html>",
     });
@@ -214,7 +214,7 @@ describe("CSP Form Hijacking Check", () => {
     ]);
   });
 
-  it("should not run when CSP header is missing", async () => {
+  it("should find no issues with form-action 'none'", async () => {
     const request = createMockRequest({
       id: "6",
       host: "example.com",
@@ -224,6 +224,44 @@ describe("CSP Form Hijacking Check", () => {
 
     const response = createMockResponse({
       id: "6",
+      code: 200,
+      headers: {
+        "content-type": ["text/html"],
+        "content-security-policy": ["form-action 'none'"],
+      },
+      body: "<html><body>Test</body></html>",
+    });
+
+    const executionHistory = await runCheck(cspFormHijackingCheck, [
+      { request, response },
+    ]);
+
+    expect(executionHistory).toMatchObject([
+      {
+        checkId: "csp-form-hijacking",
+        targetRequestId: "6",
+        status: "completed",
+        steps: [
+          {
+            stepName: "checkCspFormHijacking",
+            findings: [],
+            result: "done",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("should not run when CSP header is missing", async () => {
+    const request = createMockRequest({
+      id: "7",
+      host: "example.com",
+      method: "GET",
+      path: "/",
+    });
+
+    const response = createMockResponse({
+      id: "7",
       code: 200,
       headers: { "content-type": ["text/html"] },
       body: "<html><body>Test</body></html>",
@@ -236,7 +274,7 @@ describe("CSP Form Hijacking Check", () => {
     expect(executionHistory).toMatchObject([
       {
         checkId: "csp-form-hijacking",
-        targetRequestId: "6",
+        targetRequestId: "7",
         status: "completed",
         steps: [
           {

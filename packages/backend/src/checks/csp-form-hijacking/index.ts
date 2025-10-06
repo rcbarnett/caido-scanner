@@ -1,9 +1,9 @@
 import { defineCheck, done, Severity } from "engine";
 
 import { CSPParser } from "../../parsers/csp";
-import { keyStrategy } from "../../utils";
+import { findingBuilder, keyStrategy } from "../../utils";
 
-export default defineCheck<unknown>(({ step }) => {
+export default defineCheck(({ step }) => {
   step("checkCspFormHijacking", (state, context) => {
     const { response } = context.target;
 
@@ -27,128 +27,69 @@ export default defineCheck<unknown>(({ step }) => {
     const cspValue = cspHeader[0] ?? "";
     const parsedCsp = CSPParser.parse(cspValue);
 
+    // Check if parsing was successful
+    if (parsedCsp.kind === "Failed") {
+      return done({ state });
+    }
+
     // Find form-action directive
     const formActionDirective = parsedCsp.directives.find(
-      (d) => d.name === "form-action"
+      (d) => d.name === "form-action",
     );
-
-    const findings = [];
 
     // Check if form-action directive is missing
     if (!formActionDirective) {
-      findings.push({
+      const finding = findingBuilder({
         name: "Content security policy: allows form hijacking",
-        description: `The Content Security Policy is missing the form-action directive, which can lead to form hijacking attacks.
+        severity: Severity.INFO,
+        request: context.target.request,
+      })
+        .withDescription(
+          "The Content Security Policy is missing the form-action directive.",
+        )
+        .withImpact(
+          "Forms can be submitted to any destination, allowing form hijacking attacks that redirect form submissions to malicious endpoints.",
+        )
+        .withRecommendation(
+          "Add a form-action directive to restrict where forms can be submitted. Use 'self' to allow only same-origin submissions, or 'none' to prevent all form submissions.",
+        )
+        .withArtifacts("CSP Header", [cspValue])
+        .build();
 
-**CSP Header:** \`${cspValue}\`
-
-**Missing Directive:** \`form-action\`
-
-**Impact:** 
-- Forms can be submitted to malicious endpoints
-- CSRF attacks can redirect form submissions
-- Data exfiltration through form redirection
-- Unauthorized data submission to external domains
-
-**Recommendation:** Add a form-action directive to restrict where forms can be submitted. Use 'self' to allow only same-origin submissions, or specify trusted domains.`,
-        severity: Severity.MEDIUM,
-        correlation: {
-          requestID: context.target.request.getId(),
-          locations: [],
-        },
-      });
-    } else {
-      // Check for overly permissive form-action values
-      const formActionValues = formActionDirective.values;
-
-      // Check for wildcard
-      if (formActionValues.includes("*")) {
-        findings.push({
-          name: "Content security policy: allows form hijacking",
-          description: `The Content Security Policy allows forms to be submitted to any destination with wildcard (*), which can lead to form hijacking attacks.
-
-**CSP Header:** \`${cspValue}\`
-
-**Directive:** \`form-action\`
-
-**Unsafe Values:** \`*\`
-
-**Impact:** 
-- Forms can be submitted to any malicious endpoint
-- Complete bypass of form submission restrictions
-- Data exfiltration through form redirection
-
-**Recommendation:** Replace wildcard (*) with specific trusted domains or use 'self' for same-origin submissions only.`,
-          severity: Severity.HIGH,
-          correlation: {
-            requestID: context.target.request.getId(),
-            locations: [],
-          },
-        });
-      }
-
-      // Check for data: and blob: sources
-      const unsafeSources = formActionValues.filter(
-        (value) => value.startsWith("data:") || value.startsWith("blob:")
-      );
-
-      if (unsafeSources.length > 0) {
-        findings.push({
-          name: "Content security policy: allows form hijacking",
-          description: `The Content Security Policy allows forms to be submitted to data: and blob: sources, which can lead to form hijacking attacks.
-
-**CSP Header:** \`${cspValue}\`
-
-**Directive:** \`form-action\`
-
-**Unsafe Sources:** \`${unsafeSources.join(", ")}\`
-
-**Impact:** 
-- Forms can be submitted to data URLs
-- Data exfiltration through malicious form actions
-- Bypass of form submission restrictions
-
-**Recommendation:** Remove data: and blob: sources from form-action unless absolutely necessary for legitimate use cases.`,
-          severity: Severity.MEDIUM,
-          correlation: {
-            requestID: context.target.request.getId(),
-            locations: [],
-          },
-        });
-      }
-
-      // Check for HTTP sources without HTTPS
-      const httpSources = formActionValues.filter(
-        (value) => value.startsWith("http:") && !value.startsWith("https:")
-      );
-
-      if (httpSources.length > 0) {
-        findings.push({
-          name: "Content security policy: allows form hijacking",
-          description: `The Content Security Policy allows forms to be submitted to HTTP sources, which can be intercepted and modified.
-
-**CSP Header:** \`${cspValue}\`
-
-**Directive:** \`form-action\`
-
-**HTTP Sources:** \`${httpSources.join(", ")}\`
-
-**Impact:** 
-- HTTP form submissions can be intercepted by attackers
-- Man-in-the-middle attacks can modify form data
-- Insecure transmission of sensitive form data
-
-**Recommendation:** Use HTTPS sources only or ensure HTTP sources are from trusted, internal networks.`,
-          severity: Severity.LOW,
-          correlation: {
-            requestID: context.target.request.getId(),
-            locations: [],
-          },
-        });
-      }
+      return done({ state, findings: [finding] });
     }
 
-    return done({ state, findings });
+    // Check for overly permissive form-action values
+    const isSelfOrNone = formActionDirective.values.every(
+      (value) => value === "'self'" || value === "'none'",
+    );
+
+    if (isSelfOrNone) {
+      return done({ state });
+    }
+
+    const unsafeValues = formActionDirective.values.filter(
+      (value) => value !== "'self'" && value !== "'none'",
+    );
+
+    const finding = findingBuilder({
+      name: "Content security policy: allows form hijacking",
+      severity: Severity.INFO,
+      request: context.target.request,
+    })
+      .withDescription(
+        "The content security policy allows forms to be submitted to destinations other than 'self' or 'none'.",
+      )
+      .withImpact(
+        "Forms can be submitted to external or untrusted destinations, allowing form hijacking attacks that redirect form submissions to malicious endpoints.",
+      )
+      .withRecommendation(
+        "Restrict form submissions to 'self' or 'none' to prevent form hijacking attacks.",
+      )
+      .withArtifacts("Unsafe Values", unsafeValues)
+      .build();
+
+    return done({ state, findings: [finding] });
   });
 
   return {
@@ -158,8 +99,14 @@ export default defineCheck<unknown>(({ step }) => {
       description:
         "Checks for missing or overly permissive form-action directives in Content Security Policy headers, which can lead to form hijacking attacks",
       type: "passive",
-      tags: ["csp", "security-headers", "form-hijacking", "csrf", "form-action"],
-      severities: [Severity.LOW, Severity.MEDIUM, Severity.HIGH],
+      tags: [
+        "csp",
+        "security-headers",
+        "form-hijacking",
+        "form-action",
+        "csrf",
+      ],
+      severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },
     initState: () => ({}),
