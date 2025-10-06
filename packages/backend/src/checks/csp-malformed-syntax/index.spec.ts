@@ -39,7 +39,7 @@ describe("CSP Malformed Syntax Check", () => {
             findings: [
               {
                 name: "Content security policy: malformed syntax",
-                severity: "medium",
+                severity: "info",
               },
             ],
             result: "done",
@@ -49,7 +49,7 @@ describe("CSP Malformed Syntax Check", () => {
     ]);
   });
 
-  it("should detect duplicate directives", async () => {
+  it("should detect malformed syntax with extra semicolons", async () => {
     const request = createMockRequest({
       id: "2",
       host: "example.com",
@@ -62,9 +62,7 @@ describe("CSP Malformed Syntax Check", () => {
       code: 200,
       headers: {
         "content-type": ["text/html"],
-        "content-security-policy": [
-          "script-src 'self'; script-src 'unsafe-inline'",
-        ],
+        "content-security-policy": ["default-src 'self';; script-src 'self'"],
       },
       body: "<html><body>Test</body></html>",
     });
@@ -84,7 +82,7 @@ describe("CSP Malformed Syntax Check", () => {
             findings: [
               {
                 name: "Content security policy: malformed syntax",
-                severity: "low",
+                severity: "info",
               },
             ],
             result: "done",
@@ -132,16 +130,56 @@ describe("CSP Malformed Syntax Check", () => {
     ]);
   });
 
-  it("should not run on non-HTML responses", async () => {
+  it("should find no issues with duplicate directives (valid CSP syntax)", async () => {
     const request = createMockRequest({
       id: "4",
+      host: "example.com",
+      method: "GET",
+      path: "/",
+    });
+
+    const response = createMockResponse({
+      id: "4",
+      code: 200,
+      headers: {
+        "content-type": ["text/html"],
+        "content-security-policy": [
+          "script-src 'self'; script-src 'unsafe-inline'",
+        ],
+      },
+      body: "<html><body>Test</body></html>",
+    });
+
+    const executionHistory = await runCheck(cspMalformedSyntaxCheck, [
+      { request, response },
+    ]);
+
+    expect(executionHistory).toMatchObject([
+      {
+        checkId: "csp-malformed-syntax",
+        targetRequestId: "4",
+        status: "completed",
+        steps: [
+          {
+            stepName: "checkCspMalformedSyntax",
+            findings: [],
+            result: "done",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("should not run on non-HTML responses", async () => {
+    const request = createMockRequest({
+      id: "5",
       host: "example.com",
       method: "GET",
       path: "/api/data",
     });
 
     const response = createMockResponse({
-      id: "4",
+      id: "5",
       code: 200,
       headers: { "content-type": ["application/json"] },
       body: '{"data": "test"}',
@@ -156,14 +194,14 @@ describe("CSP Malformed Syntax Check", () => {
 
   it("should not run when CSP header is missing", async () => {
     const request = createMockRequest({
-      id: "5",
+      id: "6",
       host: "example.com",
       method: "GET",
       path: "/",
     });
 
     const response = createMockResponse({
-      id: "5",
+      id: "6",
       code: 200,
       headers: { "content-type": ["text/html"] },
       body: "<html><body>Test</body></html>",
@@ -176,7 +214,7 @@ describe("CSP Malformed Syntax Check", () => {
     expect(executionHistory).toMatchObject([
       {
         checkId: "csp-malformed-syntax",
-        targetRequestId: "5",
+        targetRequestId: "6",
         status: "completed",
         steps: [
           {
