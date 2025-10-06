@@ -29,13 +29,13 @@ export default defineCheck<unknown>(({ step }) => {
 
     // Find style-src directive
     const styleSrcDirective = parsedCsp.directives.find(
-      (d) => d.name === "style-src"
+      (d) => d.name === "style-src",
     );
 
     // If no style-src directive, check default-src
-    const effectiveDirective = styleSrcDirective || parsedCsp.directives.find(
-      (d) => d.name === "default-src"
-    );
+    const effectiveDirective =
+      styleSrcDirective ||
+      parsedCsp.directives.find((d) => d.name === "default-src");
 
     if (!effectiveDirective) {
       return done({ state });
@@ -97,7 +97,7 @@ export default defineCheck<unknown>(({ step }) => {
 
     // Check for data: and blob: sources
     const unsafeSources = effectiveDirective.values.filter(
-      (value) => value.startsWith("data:") || value.startsWith("blob:")
+      (value) => value.startsWith("data:") || value.startsWith("blob:"),
     );
 
     if (unsafeSources.length > 0) {
@@ -127,7 +127,7 @@ export default defineCheck<unknown>(({ step }) => {
 
     // Check for overly permissive sources (http: without https:)
     const httpSources = effectiveDirective.values.filter(
-      (value) => value.startsWith("http:") && !value.startsWith("https:")
+      (value) => value.startsWith("http:") && !value.startsWith("https:"),
     );
 
     if (httpSources.length > 0) {

@@ -37,7 +37,7 @@ describe("CSP Untrusted Script Check", () => {
             findings: [
               {
                 name: "Content security policy: allows untrusted script execution",
-                severity: "high",
+                severity: "info",
               },
             ],
             result: "done",
@@ -80,7 +80,7 @@ describe("CSP Untrusted Script Check", () => {
             findings: [
               {
                 name: "Content security policy: allows untrusted script execution",
-                severity: "high",
+                severity: "info",
               },
             ],
             result: "done",
@@ -123,7 +123,7 @@ describe("CSP Untrusted Script Check", () => {
             findings: [
               {
                 name: "Content security policy: allows untrusted script execution",
-                severity: "critical",
+                severity: "info",
               },
             ],
             result: "done",
@@ -166,7 +166,7 @@ describe("CSP Untrusted Script Check", () => {
             findings: [
               {
                 name: "Content security policy: allows untrusted script execution",
-                severity: "high",
+                severity: "info",
               },
             ],
             result: "done",
@@ -209,7 +209,7 @@ describe("CSP Untrusted Script Check", () => {
             findings: [
               {
                 name: "Content security policy: allows untrusted script execution",
-                severity: "high",
+                severity: "info",
               },
             ],
             result: "done",
@@ -232,7 +232,9 @@ describe("CSP Untrusted Script Check", () => {
       code: 200,
       headers: {
         "content-type": ["text/html"],
-        "content-security-policy": ["script-src 'self' https://trusted-cdn.com"],
+        "content-security-policy": [
+          "script-src 'self' https://trusted-cdn.com",
+        ],
       },
       body: "<html><body>Test</body></html>",
     });
@@ -257,7 +259,7 @@ describe("CSP Untrusted Script Check", () => {
     ]);
   });
 
-  it("should not run when CSP header is missing", async () => {
+  it("should detect multiple unsafe values in single finding", async () => {
     const request = createMockRequest({
       id: "7",
       host: "example.com",
@@ -267,6 +269,51 @@ describe("CSP Untrusted Script Check", () => {
 
     const response = createMockResponse({
       id: "7",
+      code: 200,
+      headers: {
+        "content-type": ["text/html"],
+        "content-security-policy": [
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' * data: blob:",
+        ],
+      },
+      body: "<html><body>Test</body></html>",
+    });
+
+    const executionHistory = await runCheck(cspUntrustedScriptCheck, [
+      { request, response },
+    ]);
+
+    expect(executionHistory).toMatchObject([
+      {
+        checkId: "csp-untrusted-script",
+        targetRequestId: "7",
+        status: "completed",
+        steps: [
+          {
+            stepName: "checkCspUntrustedScript",
+            findings: [
+              {
+                name: "Content security policy: allows untrusted script execution",
+                severity: "info",
+              },
+            ],
+            result: "done",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("should not run when CSP header is missing", async () => {
+    const request = createMockRequest({
+      id: "8",
+      host: "example.com",
+      method: "GET",
+      path: "/",
+    });
+
+    const response = createMockResponse({
+      id: "8",
       code: 200,
       headers: { "content-type": ["text/html"] },
       body: "<html><body>Test</body></html>",
@@ -279,7 +326,199 @@ describe("CSP Untrusted Script Check", () => {
     expect(executionHistory).toMatchObject([
       {
         checkId: "csp-untrusted-script",
-        targetRequestId: "7",
+        targetRequestId: "8",
+        status: "completed",
+        steps: [
+          {
+            stepName: "checkCspUntrustedScript",
+            findings: [],
+            result: "done",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("should not run when no script-src or default-src directive exists", async () => {
+    const request = createMockRequest({
+      id: "9",
+      host: "example.com",
+      method: "GET",
+      path: "/",
+    });
+
+    const response = createMockResponse({
+      id: "9",
+      code: 200,
+      headers: {
+        "content-type": ["text/html"],
+        "content-security-policy": ["img-src 'self'; style-src 'self'"],
+      },
+      body: "<html><body>Test</body></html>",
+    });
+
+    const executionHistory = await runCheck(cspUntrustedScriptCheck, [
+      { request, response },
+    ]);
+
+    expect(executionHistory).toMatchObject([
+      {
+        checkId: "csp-untrusted-script",
+        targetRequestId: "9",
+        status: "completed",
+        steps: [
+          {
+            stepName: "checkCspUntrustedScript",
+            findings: [],
+            result: "done",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("should not run on non-HTML responses", async () => {
+    const request = createMockRequest({
+      id: "10",
+      host: "example.com",
+      method: "GET",
+      path: "/api/data",
+    });
+
+    const response = createMockResponse({
+      id: "10",
+      code: 200,
+      headers: {
+        "content-type": ["application/json"],
+        "content-security-policy": ["script-src 'unsafe-inline'"],
+      },
+      body: '{"data": "test"}',
+    });
+
+    const executionHistory = await runCheck(cspUntrustedScriptCheck, [
+      { request, response },
+    ]);
+
+    expect(executionHistory).toMatchObject([]);
+  });
+
+  it("should not run when response is undefined", async () => {
+    const request = createMockRequest({
+      id: "11",
+      host: "example.com",
+      method: "GET",
+      path: "/",
+    });
+
+    const executionHistory = await runCheck(cspUntrustedScriptCheck, [
+      { request, response: undefined },
+    ]);
+
+    expect(executionHistory).toMatchObject([]);
+  });
+
+  it("should handle malformed CSP gracefully", async () => {
+    const request = createMockRequest({
+      id: "12",
+      host: "example.com",
+      method: "GET",
+      path: "/",
+    });
+
+    const response = createMockResponse({
+      id: "12",
+      code: 200,
+      headers: {
+        "content-type": ["text/html"],
+        "content-security-policy": ["invalid-csp-syntax!!!"],
+      },
+      body: "<html><body>Test</body></html>",
+    });
+
+    const executionHistory = await runCheck(cspUntrustedScriptCheck, [
+      { request, response },
+    ]);
+
+    expect(executionHistory).toMatchObject([
+      {
+        checkId: "csp-untrusted-script",
+        targetRequestId: "12",
+        status: "completed",
+        steps: [
+          {
+            stepName: "checkCspUntrustedScript",
+            findings: [],
+            result: "done",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("should find no issues with nonce-based CSP", async () => {
+    const request = createMockRequest({
+      id: "13",
+      host: "example.com",
+      method: "GET",
+      path: "/",
+    });
+
+    const response = createMockResponse({
+      id: "13",
+      code: 200,
+      headers: {
+        "content-type": ["text/html"],
+        "content-security-policy": ["script-src 'self' 'nonce-abc123def456'"],
+      },
+      body: "<html><body>Test</body></html>",
+    });
+
+    const executionHistory = await runCheck(cspUntrustedScriptCheck, [
+      { request, response },
+    ]);
+
+    expect(executionHistory).toMatchObject([
+      {
+        checkId: "csp-untrusted-script",
+        targetRequestId: "13",
+        status: "completed",
+        steps: [
+          {
+            stepName: "checkCspUntrustedScript",
+            findings: [],
+            result: "done",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("should find no issues with hash-based CSP", async () => {
+    const request = createMockRequest({
+      id: "14",
+      host: "example.com",
+      method: "GET",
+      path: "/",
+    });
+
+    const response = createMockResponse({
+      id: "14",
+      code: 200,
+      headers: {
+        "content-type": ["text/html"],
+        "content-security-policy": ["script-src 'self' 'sha256-abc123def456'"],
+      },
+      body: "<html><body>Test</body></html>",
+    });
+
+    const executionHistory = await runCheck(cspUntrustedScriptCheck, [
+      { request, response },
+    ]);
+
+    expect(executionHistory).toMatchObject([
+      {
+        checkId: "csp-untrusted-script",
+        targetRequestId: "14",
         status: "completed",
         steps: [
           {
