@@ -1,8 +1,8 @@
 import { defineCheck, done, Severity } from "engine";
 
-import { keyStrategy } from "../../utils";
+import { findingBuilder, keyStrategy } from "../../utils";
 
-export default defineCheck<unknown>(({ step }) => {
+export default defineCheck(({ step }) => {
   step("checkCspNotEnforced", (state, context) => {
     const { response } = context.target;
 
@@ -16,28 +16,34 @@ export default defineCheck<unknown>(({ step }) => {
       return done({ state });
     }
 
+    const cspReportOnlyHeader = response.getHeader(
+      "content-security-policy-report-only",
+    );
     const cspHeader = response.getHeader("content-security-policy");
 
-    // Check if CSP header is missing
-    if (!cspHeader || cspHeader.length === 0) {
-      const finding = {
+    // Check if CSP is in report-only mode (not enforced) and no regular CSP header exists
+    if (
+      cspReportOnlyHeader &&
+      cspReportOnlyHeader.length > 0 &&
+      (!cspHeader || cspHeader.length === 0)
+    ) {
+      const cspValue = cspReportOnlyHeader[0] ?? "";
+      const finding = findingBuilder({
         name: "Content security policy: not enforced",
-        description: `The application does not include a Content Security Policy (CSP) header. Without CSP, the application is vulnerable to Cross-Site Scripting (XSS) attacks, data injection attacks, and other code injection vulnerabilities.
-
-**Missing Header:** \`Content-Security-Policy\`
-
-**Impact:** 
-- XSS attacks can execute malicious scripts
-- Data injection attacks can inject unauthorized content
-- Clickjacking attacks can embed the application in malicious frames
-
-**Recommendation:** Add appropriate CSP directives to provide actual security protection.`,
-        severity: Severity.HIGH,
-        correlation: {
-          requestID: context.target.request.getId(),
-          locations: [],
-        },
-      };
+        severity: Severity.INFO,
+        request: context.target.request,
+      })
+        .withDescription(
+          "The application uses Content-Security-Policy-Report-Only header without a regular Content-Security-Policy header, which means the CSP is not enforced and only reports violations.",
+        )
+        .withImpact(
+          "CSP in report-only mode provides no actual protection against XSS and other attacks, as violations are only logged but not blocked.",
+        )
+        .withRecommendation(
+          "Replace Content-Security-Policy-Report-Only with Content-Security-Policy to enforce the policy and provide actual security protection.",
+        )
+        .withArtifacts("CSP Report-Only Header", [cspValue])
+        .build();
 
       return done({ state, findings: [finding] });
     }
@@ -50,10 +56,10 @@ export default defineCheck<unknown>(({ step }) => {
       id: "csp-not-enforced",
       name: "Content security policy: not enforced",
       description:
-        "Checks for the absence of Content Security Policy headers, which leaves applications vulnerable to XSS and code injection attacks",
+        "Checks for Content-Security-Policy-Report-Only headers, which indicate CSP is not enforced and only reports violations",
       type: "passive",
-      tags: ["csp", "security-headers", "xss", "injection"],
-      severities: [Severity.HIGH],
+      tags: ["csp", "security-headers", "report-only", "enforcement"],
+      severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },
     initState: () => ({}),

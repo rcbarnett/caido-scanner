@@ -114,7 +114,7 @@ describe("CSP Not Enforced Check", () => {
     expect(executionHistory).toMatchObject([]);
   });
 
-  it("should detect Report-Only header instead of CSP header", async () => {
+  it("should detect Report-Only header and report CSP not enforced", async () => {
     const request = createMockRequest({
       id: "5",
       host: "example.com",
@@ -149,7 +149,7 @@ describe("CSP Not Enforced Check", () => {
             findings: [
               {
                 name: "Content security policy: not enforced",
-                severity: "high",
+                severity: "info",
               },
             ],
             result: "done",
@@ -159,45 +159,7 @@ describe("CSP Not Enforced Check", () => {
     ]);
   });
 
-  it("should not report empty Report-Only header", async () => {
-    const request = createMockRequest({
-      id: "6",
-      host: "example.com",
-      method: "GET",
-      path: "/",
-    });
-
-    const response = createMockResponse({
-      id: "6",
-      code: 200,
-      headers: {
-        "content-type": ["text/html"],
-        "content-security-policy-report-only": [""],
-      },
-      body: "<html><body>Test</body></html>",
-    });
-
-    const executionHistory = await runCheck(cspNotEnforcedCheck, [
-      { request, response },
-    ]);
-
-    expect(executionHistory).toMatchObject([
-      {
-        checkId: "csp-not-enforced",
-        targetRequestId: "6",
-        status: "completed",
-        steps: [
-          {
-            stepName: "checkCspNotEnforced",
-            findings: [],
-            result: "done",
-          },
-        ],
-      },
-    ]);
-  });
-
-  it("should detect malformed CSP syntax", async () => {
+  it("should find no issues when only CSP header is present (not report-only)", async () => {
     const request = createMockRequest({
       id: "7",
       host: "example.com",
@@ -210,7 +172,7 @@ describe("CSP Not Enforced Check", () => {
       code: 200,
       headers: {
         "content-type": ["text/html"],
-        "content-security-policy": ["invalid-directive-name 'self'"],
+        "content-security-policy": ["default-src 'self'"],
       },
       body: "<html><body>Test</body></html>",
     });
@@ -227,12 +189,7 @@ describe("CSP Not Enforced Check", () => {
         steps: [
           {
             stepName: "checkCspNotEnforced",
-            findings: [
-              {
-                name: "Content security policy: malformed syntax",
-                severity: "high",
-              },
-            ],
+            findings: [],
             result: "done",
           },
         ],
@@ -240,7 +197,7 @@ describe("CSP Not Enforced Check", () => {
     ]);
   });
 
-  it("should detect empty CSP directives", async () => {
+  it("should find no issues when both CSP and Report-Only headers are present", async () => {
     const request = createMockRequest({
       id: "8",
       host: "example.com",
@@ -253,7 +210,10 @@ describe("CSP Not Enforced Check", () => {
       code: 200,
       headers: {
         "content-type": ["text/html"],
-        "content-security-policy": [""],
+        "content-security-policy": ["default-src 'self'"],
+        "content-security-policy-report-only": [
+          "default-src 'self'; script-src 'self'",
+        ],
       },
       body: "<html><body>Test</body></html>",
     });
@@ -270,12 +230,7 @@ describe("CSP Not Enforced Check", () => {
         steps: [
           {
             stepName: "checkCspNotEnforced",
-            findings: [
-              {
-                name: "Content security policy: no directives",
-                severity: "high",
-              },
-            ],
+            findings: [],
             result: "done",
           },
         ],
