@@ -1,9 +1,9 @@
 @top CSP {
-  Directive*
+  Directive (";" Directive)*
 }
 
 Directive {
-  DirectiveName sourceList? ";"
+  DirectiveName sourceList?
 }
 
 DirectiveName { directiveName }
