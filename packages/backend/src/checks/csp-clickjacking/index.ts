@@ -41,11 +41,11 @@ export default defineCheck(({ step }) => {
     if (!frameAncestorsDirective) {
       const finding = findingBuilder({
         name: "Content security policy: allows clickjacking",
-        severity: Severity.MEDIUM,
+        severity: Severity.INFO,
         request: context.target.request,
       })
         .withDescription(
-          "The Content Security Policy is missing the frame-ancestors directive, which can lead to clickjacking attacks.",
+          "The Content Security Policy is missing the frame-ancestors directive.",
         )
         .withImpact(
           "The application can be embedded in malicious frames, allowing clickjacking attacks that trick users into performing unintended actions.",
@@ -60,83 +60,36 @@ export default defineCheck(({ step }) => {
     }
 
     // Check for overly permissive frame-ancestors values
-    const frameAncestorsValues = frameAncestorsDirective.values;
-
-    // Check for wildcard
-    if (frameAncestorsValues.includes("*")) {
-      const finding = findingBuilder({
-        name: "Content security policy: allows clickjacking",
-        severity: Severity.HIGH,
-        request: context.target.request,
-      })
-        .withDescription(
-          "The Content Security Policy allows the application to be embedded in frames from any source with wildcard (*), which can lead to clickjacking attacks.",
-        )
-        .withImpact(
-          "The application can be embedded in malicious frames from any domain, allowing complete bypass of frame embedding restrictions.",
-        )
-        .withRecommendation(
-          "Replace wildcard (*) with specific trusted domains or use 'self' for same-origin framing only.",
-        )
-        .withArtifacts("Unsafe Values", ["*"])
-        .build();
-
-      return done({ state, findings: [finding] });
-    }
-
-    // Check for data: and blob: sources
-    const unsafeSources = frameAncestorsValues.filter(
-      (value) => value.startsWith("data:") || value.startsWith("blob:"),
+    const isSelfOrNone = frameAncestorsDirective.values.every(
+      (value) => value === "'self'" || value === "'none'",
     );
 
-    if (unsafeSources.length > 0) {
-      const finding = findingBuilder({
-        name: "Content security policy: allows clickjacking",
-        severity: Severity.MEDIUM,
-        request: context.target.request,
-      })
-        .withDescription(
-          "The Content Security Policy allows the application to be embedded in frames from data: and blob: sources, which can lead to clickjacking attacks.",
-        )
-        .withImpact(
-          "The application can be embedded in data URL frames, allowing clickjacking attacks through data URLs and bypass of frame embedding restrictions.",
-        )
-        .withRecommendation(
-          "Remove data: and blob: sources from frame-ancestors unless absolutely necessary for legitimate use cases.",
-        )
-        .withArtifacts("Unsafe Sources", unsafeSources)
-        .build();
-
-      return done({ state, findings: [finding] });
+    if (isSelfOrNone) {
+      return done({ state });
     }
 
-    // Check for HTTP sources without HTTPS
-    const httpSources = frameAncestorsValues.filter(
-      (value) => value.startsWith("http:") && !value.startsWith("https:"),
+    const unsafeValues = frameAncestorsDirective.values.filter(
+      (value) => value !== "'self'" && value !== "'none'",
     );
 
-    if (httpSources.length > 0) {
-      const finding = findingBuilder({
-        name: "Content security policy: allows clickjacking",
-        severity: Severity.LOW,
-        request: context.target.request,
-      })
-        .withDescription(
-          "The Content Security Policy allows the application to be embedded in frames from HTTP sources, which can be intercepted and modified.",
-        )
-        .withImpact(
-          "HTTP frame sources can be intercepted by attackers, allowing man-in-the-middle attacks that modify frame content.",
-        )
-        .withRecommendation(
-          "Use HTTPS sources only or ensure HTTP sources are from trusted, internal networks.",
-        )
-        .withArtifacts("HTTP Sources", httpSources)
-        .build();
+    const finding = findingBuilder({
+      name: "Content security policy: allows clickjacking",
+      severity: Severity.INFO,
+      request: context.target.request,
+    })
+      .withDescription(
+        "The content security policy allows the application to be embedded in frames from sources other than 'self' or 'none'.",
+      )
+      .withImpact(
+        "The application can be embedded in malicious frames, allowing clickjacking attacks that trick users into performing unintended actions.",
+      )
+      .withRecommendation(
+        "Restrict the application to be embedded in frames from 'self' or 'none'.",
+      )
+      .withArtifacts("Unsafe Values", unsafeValues)
+      .build();
 
-      return done({ state, findings: [finding] });
-    }
-
-    return done({ state });
+    return done({ state, findings: [finding] });
   });
 
   return {
@@ -153,7 +106,7 @@ export default defineCheck(({ step }) => {
         "frame-ancestors",
         "ui-redressing",
       ],
-      severities: [Severity.LOW, Severity.MEDIUM, Severity.HIGH],
+      severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },
     initState: () => ({}),
