@@ -71,6 +71,8 @@ const launcher = useLauncher();
         label="Run Scan"
         icon="fas fa-play"
         severity="success"
+        :disabled="launcher.isLoading"
+        :loading="launcher.isLoading"
         @click="launcher.onSubmit(props.sdk, props.incrementCount)"
       />
     </div>

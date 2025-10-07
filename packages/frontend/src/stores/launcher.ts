@@ -37,6 +37,8 @@ export const useLauncher = defineStore("stores.launcher", () => {
     title: "Active Scan",
   };
 
+  const isLoading = ref(false);
+
   const dialog = ref<Dialog | undefined>(undefined);
 
   const form = reactive<FormState>({ ...defaultFormState });
@@ -49,6 +51,7 @@ export const useLauncher = defineStore("stores.launcher", () => {
 
   const onSubmit = async (sdk: FrontendSDK, incrementCount: () => void) => {
     const payload = toRequestPayload();
+    isLoading.value = true;
     const result = await scannerService.startActiveScan(payload);
 
     switch (result.kind) {
@@ -57,15 +60,18 @@ export const useLauncher = defineStore("stores.launcher", () => {
         incrementCount();
 
         dialog.value?.close();
+        isLoading.value = false;
         break;
       }
       case "Error":
+        isLoading.value = false;
         break;
     }
   };
 
   const restart = () => {
     Object.assign(form, defaultFormState);
+    isLoading.value = false;
   };
 
   const setDialog = (newDialog: Dialog) => {
@@ -74,6 +80,7 @@ export const useLauncher = defineStore("stores.launcher", () => {
 
   return {
     form,
+    isLoading,
     dialog,
     onSubmit,
     restart,
