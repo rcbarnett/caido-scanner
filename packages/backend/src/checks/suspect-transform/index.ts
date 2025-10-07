@@ -47,7 +47,7 @@ function generateArithmeticExpression(): { probe: string; expected: string } {
 }
 
 function getChecksForAggressivity(
-  aggressivity: ScanAggressivity
+  aggressivity: ScanAggressivity,
 ): TransformCheck[] {
   const leftAnchor = generateRandomString(6);
   const rightAnchor = generateRandomString(6);
@@ -173,7 +173,7 @@ export default defineCheck<State>(({ step }) => {
     }
 
     const skipDueToInitialPresence = currentCheck.expectedValues.some(
-      (expected) => initialResponseBody.includes(expected)
+      (expected) => initialResponseBody.includes(expected),
     );
 
     if (skipDueToInitialPresence) {
@@ -192,12 +192,11 @@ export default defineCheck<State>(({ step }) => {
       const requestSpec = createRequestWithParameter(
         context,
         currentParam,
-        testValue
+        testValue,
       );
 
-      const { request, response } = await context.sdk.requests.send(
-        requestSpec
-      );
+      const { request, response } =
+        await context.sdk.requests.send(requestSpec);
 
       if (response !== undefined) {
         const responseBody = response.getBody()?.toText();
@@ -206,7 +205,7 @@ export default defineCheck<State>(({ step }) => {
           const matched = currentCheck.expectedValues.some(
             (expected) =>
               responseBody.includes(expected) &&
-              !initialResponseBody.includes(expected)
+              !initialResponseBody.includes(expected),
           );
 
           if (matched) {
@@ -219,13 +218,13 @@ export default defineCheck<State>(({ step }) => {
                 request,
               })
                 .withDescription(
-                  `Parameter \`${currentParam.name}\` in ${currentParam.source} exhibits suspicious input transformation. The application transforms input in a manner that indicates potential vulnerability such as code injection, validation bypass, or other security issues.`
+                  `Parameter \`${currentParam.name}\` in ${currentParam.source} exhibits suspicious input transformation. The application transforms input in a manner that indicates potential vulnerability such as code injection, validation bypass, or other security issues.`,
                 )
                 .withImpact(
-                  `The detected transformation suggests the application is processing user input in an unexpected way, which could potentially be exploited for:\n\n- **Code Injection**: Template engines or expression evaluators may execute malicious code\n- **Authentication Bypass**: Unicode normalization could bypass security checks\n- **Validation Bypass**: Character transformations could evade input filters\n- **Data Corruption**: Unexpected transformations could lead to application logic errors`
+                  `The detected transformation suggests the application is processing user input in an unexpected way, which could potentially be exploited for:\n\n- **Code Injection**: Template engines or expression evaluators may execute malicious code\n- **Authentication Bypass**: Unicode normalization could bypass security checks\n- **Validation Bypass**: Character transformations could evade input filters\n- **Data Corruption**: Unexpected transformations could lead to application logic errors`,
                 )
                 .withRecommendation(
-                  `1. **Validate Input Strictly**: Implement strict input validation before any transformation\n2. **Disable Dynamic Evaluation**: If possible, disable template evaluation or expression parsing for user input\n3. **Use Safe APIs**: Use safe string handling functions that don't perform unexpected transformations\n4. **Security Testing**: Perform thorough manual testing to understand the full impact\n5. **Monitor for Anomalies**: Log and monitor for unusual transformation patterns`
+                  `1. **Validate Input Strictly**: Implement strict input validation before any transformation\n2. **Disable Dynamic Evaluation**: If possible, disable template evaluation or expression parsing for user input\n3. **Use Safe APIs**: Use safe string handling functions that don't perform unexpected transformations\n4. **Security Testing**: Perform thorough manual testing to understand the full impact\n5. **Monitor for Anomalies**: Log and monitor for unusual transformation patterns`,
                 )
                 .withArtifacts("Detection Details", [
                   `**Transformation Type**: ${currentCheck.name}`,
@@ -264,7 +263,9 @@ export default defineCheck<State>(({ step }) => {
           }
         }
       }
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     const nextCheckIndex = state.currentCheckIndex + 1;
     const nextParamIndex =
