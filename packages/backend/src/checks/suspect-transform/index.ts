@@ -218,21 +218,19 @@ export default defineCheck<State>(({ step }) => {
                 request,
               })
                 .withDescription(
-                  `Parameter \`${currentParam.name}\` in ${currentParam.source} exhibits suspicious input transformation. The application transforms input in a manner that indicates potential vulnerability such as code injection, validation bypass, or other security issues.`,
+                  `The application transforms user input in parameter ${currentParam.name} in an unexpected way that may indicate a security vulnerability.`,
                 )
                 .withImpact(
-                  `The detected transformation suggests the application is processing user input in an unexpected way, which could potentially be exploited for:\n\n- **Code Injection**: Template engines or expression evaluators may execute malicious code\n- **Authentication Bypass**: Unicode normalization could bypass security checks\n- **Validation Bypass**: Character transformations could evade input filters\n- **Data Corruption**: Unexpected transformations could lead to application logic errors`,
+                  "Input transformation vulnerabilities can lead to code injection, authentication bypass, or validation bypass attacks.",
                 )
                 .withRecommendation(
-                  `1. **Validate Input Strictly**: Implement strict input validation before any transformation\n2. **Disable Dynamic Evaluation**: If possible, disable template evaluation or expression parsing for user input\n3. **Use Safe APIs**: Use safe string handling functions that don't perform unexpected transformations\n4. **Security Testing**: Perform thorough manual testing to understand the full impact\n5. **Monitor for Anomalies**: Log and monitor for unusual transformation patterns`,
+                  "Implement strict input validation and avoid dynamic evaluation of user input. Review the application's input processing logic.",
                 )
                 .withArtifacts("Detection Details", [
-                  `**Transformation Type**: ${currentCheck.name}`,
-                  `**Probe Sent**: \`${currentCheck.probe}\``,
-                  `**Expected Values**: ${currentCheck.expectedValues
-                    .map((v) => `\`${v}\``)
-                    .join(", ")}`,
-                  `**Confirmed**: Yes (${confirmCount} consecutive detections)`,
+                  `Transformation Type: ${currentCheck.name}`,
+                  `Probe Sent: ${currentCheck.probe}`,
+                  `Expected Values: ${currentCheck.expectedValues.join(", ")}`,
+                  `Confirmed: Yes (${confirmCount} consecutive detections)`,
                 ])
                 .build();
 
@@ -314,8 +312,6 @@ export default defineCheck<State>(({ step }) => {
       .withPath()
       .withQueryKeys()
       .build(),
-    when: (target) => {
-      return hasParameters(target);
-    },
+    when: (target) => hasParameters(target),
   };
 });
