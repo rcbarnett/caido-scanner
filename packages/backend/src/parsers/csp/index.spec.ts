@@ -24,6 +24,27 @@ describe("CSPParser", () => {
       });
     });
 
+    it("should parse with ; at the end", () => {
+      const cspHeader =
+        "default-src 'self'; script-src 'self' 'unsafe-inline';";
+      const result = CSPParser.parse(cspHeader);
+
+      expect(result).toMatchObject({
+        kind: "Success",
+        raw: cspHeader,
+        directives: [
+          {
+            name: "default-src",
+            values: ["'self'"],
+          },
+          {
+            name: "script-src",
+            values: ["'self'", "'unsafe-inline'"],
+          },
+        ],
+      });
+    });
+
     it("should parse CSP with multiple values per directive", () => {
       const cspHeader = "script-src 'self' https://example.com 'unsafe-inline'";
       const result = CSPParser.parse(cspHeader);

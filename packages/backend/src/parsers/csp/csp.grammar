@@ -1,5 +1,5 @@
 @top CSP {
-  Directive (";" Directive)*
+  Directive (";" Directive)* ";"?
 }
 
 Directive {
@@ -17,16 +17,16 @@ SourceValue {
 }
 
 @tokens {
-  directiveName { "default-src" | "script-src" | "style-src" | "img-src" | "font-src" | 
-                  "connect-src" | "media-src" | "object-src" | "child-src" | "frame-src" | 
+  directiveName { "default-src" | "script-src" | "style-src" | "img-src" | "font-src" |
+                  "connect-src" | "media-src" | "object-src" | "child-src" | "frame-src" |
                   "worker-src" | "frame-ancestors" | "form-action" | "base-uri" | "plugin-types" |
                   "manifest-src" | "prefetch-src" | "navigate-to" | "require-trusted-types-for" |
                   "trusted-types" | "upgrade-insecure-requests" | "block-all-mixed-content" |
                   "referrer" | "require-sri-for" | "sandbox" | "report-uri" | "report-to" }
 
   keyword { $[a-zA-Z0-9\-_\.\*\/\:']+ }
-  
-  
+
+
   Whitespace { $[ \t\n\r]+ }
   ";"
 }

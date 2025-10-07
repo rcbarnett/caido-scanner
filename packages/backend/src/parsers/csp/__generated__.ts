@@ -2,7 +2,7 @@
 import {LRParser} from "@lezer/lr"
 export const parser = LRParser.deserialize({
   version: 14,
-  states: "!jOVQPOOOOQO'#C`'#C`O[QQO'#C_QgQPOOOOQO'#Ca'#CaOOQO'#Cc'#CcOlQQO,58yOVQPO'#CdQgQPOOOOQO-E6a-E6aOOQO,59O,59OOOQO-E6b-E6b",
+  states: "!jOVQPOOOOQO'#C`'#C`O[QQO'#C_QgQPOOOOQO'#Ca'#CaOOQO'#Cc'#CcOlQQO,58yQVQPO'#CdQgQPOOOOQO-E6a-E6aOOQO,59O,59OOOQO-E6b-E6b",
   stateData: "w~OPOS~OZPO~O[SOURXXRX~OUVO~O[SOURaXRa~O",
   goto: "tXPPPY`dPhnQRORYVTQOVTTQUQUQRXUQWRRZW",
   nodeNames: "⚠ Whitespace CSP Directive DirectiveName SourceValue ;",
