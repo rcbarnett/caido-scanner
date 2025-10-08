@@ -265,7 +265,20 @@ step("testOpenRedirect", async (state, context) => {
 ### Add to Presets
 
 - Update `packages/backend/src/stores/config.ts` to include the check in default presets.
-- Always include in the Heavy preset as enabled. For other presets, decide based on `metadata.type` and aggressivity.
+
+Light Preset:
+
+- enable in active part only if it sends a few basic requests and doesn't do resource-heavy things
+- enable in passive part only if it sends no requests and doesn't do resource-heavy things
+
+Balanced Preset:
+
+- usually we want to enable it in the active part, unless it's very resource-heavy
+- enable in passive part only if it sends a few basic requests and doesn't do resource-heavy things
+
+Heavy Preset:
+
+- no need to modify anything here, by default all checks are enabled both in passive and active
 
 ### Severity Assignment
 

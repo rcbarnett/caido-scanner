@@ -246,7 +246,8 @@ describe("SSTI Check", () => {
           host: "example.com",
           method: "GET",
           path: "/template",
-          query: callCount <= 2 ? `name=test{{1234*5678}}` : `name=test{{7*'7'}}`,
+          query:
+            callCount <= 2 ? `name=test{{1234*5678}}` : `name=test{{7*'7'}}`,
         });
 
         const mockResponse = createMockResponse({
