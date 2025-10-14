@@ -184,6 +184,10 @@ export class ConfigStore {
               checkID: Checks.CSP_ALLOWLISTED_SCRIPTS,
               enabled: true,
             },
+            {
+              checkID: Checks.MISSING_CONTENT_TYPE,
+              enabled: true,
+            },
           ],
         },
         {
@@ -361,6 +365,10 @@ export class ConfigStore {
             },
             {
               checkID: Checks.CSP_ALLOWLISTED_SCRIPTS,
+              enabled: true,
+            },
+            {
+              checkID: Checks.MISSING_CONTENT_TYPE,
               enabled: true,
             },
           ],
