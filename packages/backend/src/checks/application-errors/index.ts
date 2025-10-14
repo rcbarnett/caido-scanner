@@ -1,5 +1,6 @@
 import { defineCheck, done, Severity } from "engine";
 
+import { Tags } from "../../types";
 import { bodyMatchesAny } from "../../utils";
 import { keyStrategy } from "../../utils/key";
 
@@ -87,7 +88,7 @@ export default defineCheck<Record<never, never>>(({ step }) => {
       description:
         "Detects application error messages that may leak sensitive information about the application's internal structure",
       type: "passive",
-      tags: ["information-disclosure", "error-handling"],
+      tags: [Tags.INFORMATION_DISCLOSURE, Tags.ERROR_HANDLING],
       severities: [Severity.MEDIUM],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },

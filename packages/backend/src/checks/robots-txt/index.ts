@@ -1,6 +1,7 @@
 import { RequestSpec } from "caido:utils";
 import { continueWith, defineCheck, done, Severity } from "engine";
 
+import { Tags } from "../../types";
 import { bodyMatchesAny } from "../../utils/body";
 import { keyStrategy } from "../../utils/key";
 
@@ -84,7 +85,7 @@ export default defineCheck<{
       description:
         "Detects publicly accessible robots.txt files that may reveal directory structure and crawling policies",
       type: "active",
-      tags: ["information-disclosure"],
+      tags: [Tags.INFORMATION_DISCLOSURE],
       severities: [Severity.INFO],
       aggressivity: {
         minRequests: 1,

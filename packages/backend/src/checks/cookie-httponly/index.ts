@@ -1,5 +1,6 @@
 import { defineCheck, done, Severity } from "engine";
 
+import { Tags } from "../../types";
 import { getSetCookieHeaders, keyStrategy } from "../../utils";
 
 export default defineCheck<unknown>(({ step }) => {
@@ -47,7 +48,7 @@ export default defineCheck<unknown>(({ step }) => {
       description:
         "Checks for cookies that are set without the HttpOnly flag, which can be accessed by JavaScript and lead to XSS attacks",
       type: "passive",
-      tags: ["cookies", "httponly", "xss", "security-headers"],
+      tags: [Tags.COOKIES, Tags.HTTPONLY, Tags.XSS, Tags.SECURITY_HEADERS],
       severities: [Severity.LOW],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },

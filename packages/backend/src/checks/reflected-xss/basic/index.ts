@@ -6,6 +6,7 @@ import {
   Severity,
 } from "engine";
 
+import { Tags } from "../../../types";
 import {
   createRequestWithParameter,
   extractReflectedParameters,
@@ -212,7 +213,7 @@ export default defineCheck<State>(({ step }) => {
       description:
         "Detects basic reflected Cross-Site Scripting vulnerabilities",
       type: "active",
-      tags: ["xss"],
+      tags: [Tags.XSS],
       severities: [Severity.HIGH, Severity.MEDIUM],
       aggressivity: {
         minRequests: 0,

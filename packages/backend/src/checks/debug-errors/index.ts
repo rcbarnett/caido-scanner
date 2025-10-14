@@ -1,5 +1,6 @@
 import { defineCheck, done, Severity } from "engine";
 
+import { Tags } from "../../types";
 import { bodyMatchesAny } from "../../utils";
 import { keyStrategy } from "../../utils/key";
 
@@ -82,7 +83,7 @@ export default defineCheck<unknown>(({ step }) => {
       description:
         "Detects debug error messages that may leak sensitive information about the application's development environment or internal structure",
       type: "passive",
-      tags: ["information-disclosure", "debug", "error-handling"],
+      tags: [Tags.INFORMATION_DISCLOSURE, Tags.DEBUG, Tags.ERROR_HANDLING],
       severities: [Severity.LOW],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },

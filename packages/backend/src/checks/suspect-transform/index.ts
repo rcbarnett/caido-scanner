@@ -6,6 +6,7 @@ import {
   Severity,
 } from "engine";
 
+import { Tags } from "../../types";
 import {
   createRequestWithParameter,
   extractParameters,
@@ -291,7 +292,7 @@ export default defineCheck<State>(({ step }) => {
       description:
         "Detects suspicious input transformations including unicode normalization, expression evaluation, and other transformations that may indicate vulnerabilities",
       type: "active",
-      tags: ["injection"],
+      tags: [Tags.INJECTION],
       severities: [Severity.HIGH],
       aggressivity: {
         minRequests: 1,

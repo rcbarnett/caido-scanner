@@ -1,6 +1,7 @@
 import { defineCheck, done, Severity } from "engine";
 
 import { CSPParser } from "../../parsers/csp";
+import { Tags } from "../../types";
 import { findingBuilder, keyStrategy } from "../../utils";
 
 export default defineCheck<unknown>(({ step }) => {
@@ -89,7 +90,13 @@ export default defineCheck<unknown>(({ step }) => {
       description:
         "Mitigate cross-site scripting by avoiding 'unsafe-inline', 'unsafe-eval', data: URLs, and global wildcards in script directives. Use a secure, random nonce of at least 8 characters 'nonce-RANDOM' to prevent untrusted JavaScript execution.",
       type: "passive",
-      tags: ["csp", "security-headers", "xss", "script-src", "injection"],
+      tags: [
+        Tags.CSP,
+        Tags.SECURITY_HEADERS,
+        Tags.XSS,
+        Tags.SCRIPT_SRC,
+        Tags.INJECTION,
+      ],
       severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },

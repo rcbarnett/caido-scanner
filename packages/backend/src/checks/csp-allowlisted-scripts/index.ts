@@ -1,6 +1,7 @@
 import { defineCheck, done, Severity } from "engine";
 
 import { CSPParser } from "../../parsers/csp";
+import { Tags } from "../../types";
 import { keyStrategy } from "../../utils";
 import { findingBuilder } from "../../utils/findings";
 
@@ -87,11 +88,11 @@ export default defineCheck(({ step }) => {
         "Checks for overly permissive script-src directives in Content Security Policy headers that allow specific script sources instead of using nonces or hashes",
       type: "passive",
       tags: [
-        "csp",
-        "security-headers",
-        "script-src",
-        "supply-chain",
-        "attack-surface",
+        Tags.CSP,
+        Tags.SECURITY_HEADERS,
+        Tags.SCRIPT_SRC,
+        Tags.SUPPLY_CHAIN,
+        Tags.ATTACK_SURFACE,
       ],
       severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },

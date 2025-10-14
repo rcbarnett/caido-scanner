@@ -1,5 +1,6 @@
 import { continueWith, defineCheck, done, Severity } from "engine";
 
+import { Tags } from "../../../types";
 import {
   createRequestWithParameter,
   extractParameters,
@@ -131,7 +132,7 @@ export default defineCheck<State>(({ step }) => {
       description:
         "Detects MySQL-specific error-based SQL injection vulnerabilities by triggering database errors",
       type: "active",
-      tags: ["sqli"],
+      tags: [Tags.SQLI],
       severities: [Severity.CRITICAL],
       aggressivity: {
         minRequests: 1,

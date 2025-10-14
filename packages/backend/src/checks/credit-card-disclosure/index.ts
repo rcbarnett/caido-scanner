@@ -1,5 +1,6 @@
 import { Severity } from "engine";
 
+import { Tags } from "../../types";
 import { defineResponseRegexCheck } from "../../utils/check";
 
 // Credit card regex patterns based on Valibot implementation
@@ -34,7 +35,7 @@ export default defineResponseRegexCheck({
     name: "Credit Card Number Disclosed",
     description: "Detects credit card numbers in HTTP responses",
     type: "passive",
-    tags: ["information-disclosure", "sensitive-data"],
+    tags: [Tags.INFORMATION_DISCLOSURE, Tags.SENSITIVE_DATA],
     severities: [Severity.INFO],
     aggressivity: {
       minRequests: 0,

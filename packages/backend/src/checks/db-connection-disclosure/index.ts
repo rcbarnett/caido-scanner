@@ -1,5 +1,6 @@
 import { Severity } from "engine";
 
+import { Tags } from "../../types";
 import { defineResponseRegexCheck } from "../../utils/check";
 
 // Database connection string regex patterns
@@ -67,7 +68,7 @@ export default defineResponseRegexCheck({
     description:
       "Detects database connection strings in HTTP responses that could lead to unauthorized database access",
     type: "passive",
-    tags: ["information-disclosure", "sensitive-data"],
+    tags: [Tags.INFORMATION_DISCLOSURE, Tags.SENSITIVE_DATA],
     severities: [Severity.INFO],
     aggressivity: {
       minRequests: 0,

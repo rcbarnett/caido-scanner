@@ -6,6 +6,7 @@ import {
   Severity,
 } from "engine";
 
+import { Tags } from "../../types";
 import { keyStrategy } from "../../utils/key";
 
 const ENV_FILES = [
@@ -165,7 +166,7 @@ export default defineCheck<{
       description:
         "Detects publicly accessible environment files (.env, .env.local, etc.) that may contain sensitive configuration data",
       type: "active",
-      tags: ["information-disclosure"],
+      tags: [Tags.INFORMATION_DISCLOSURE],
       severities: [Severity.CRITICAL],
       aggressivity: {
         minRequests: 1,

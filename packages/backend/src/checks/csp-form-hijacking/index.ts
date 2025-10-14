@@ -1,6 +1,7 @@
 import { defineCheck, done, Severity } from "engine";
 
 import { CSPParser } from "../../parsers/csp";
+import { Tags } from "../../types";
 import { findingBuilder, keyStrategy } from "../../utils";
 
 export default defineCheck(({ step }) => {
@@ -100,11 +101,11 @@ export default defineCheck(({ step }) => {
         "Checks for missing or overly permissive form-action directives in Content Security Policy headers, which can lead to form hijacking attacks",
       type: "passive",
       tags: [
-        "csp",
-        "security-headers",
-        "form-hijacking",
-        "form-action",
-        "csrf",
+        Tags.CSP,
+        Tags.SECURITY_HEADERS,
+        Tags.FORM_HIJACKING,
+        Tags.FORM_ACTION,
+        Tags.CSRF,
       ],
       severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },

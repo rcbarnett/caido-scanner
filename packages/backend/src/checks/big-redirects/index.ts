@@ -7,6 +7,7 @@ import {
   type StepAction,
 } from "engine";
 
+import { Tags } from "../../types";
 import { keyStrategy } from "../../utils/key";
 
 const isRedirectResponse = (statusCode: number): boolean => {
@@ -91,7 +92,7 @@ export default defineCheck<Record<never, never>>(({ step }) => {
       description:
         "Detects redirect responses that are larger than expected or contain multiple href links, which could indicate information leakage or improper redirect implementation.",
       type: "passive",
-      tags: ["redirect", "information-disclosure"],
+      tags: [Tags.REDIRECT, Tags.INFORMATION_DISCLOSURE],
       severities: [Severity.LOW],
       aggressivity: {
         minRequests: 0,

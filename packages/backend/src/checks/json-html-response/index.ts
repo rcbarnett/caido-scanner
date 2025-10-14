@@ -1,5 +1,6 @@
 import { defineCheck, done, Severity } from "engine";
 
+import { Tags } from "../../types";
 import { keyStrategy } from "../../utils/key";
 
 export default defineCheck(({ step }) => {
@@ -69,7 +70,7 @@ export default defineCheck(({ step }) => {
       description:
         "Detects responses that contain valid JSON but have text/html Content-Type header",
       type: "passive",
-      tags: ["xss"],
+      tags: [Tags.XSS],
       severities: [Severity.INFO],
       aggressivity: {
         minRequests: 0,

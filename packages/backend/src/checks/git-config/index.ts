@@ -7,6 +7,7 @@ import {
   type Severity as SeverityType,
 } from "engine";
 
+import { Tags } from "../../types";
 import { keyStrategy } from "../../utils/key";
 
 const GIT_FILES = [
@@ -208,7 +209,7 @@ export default defineCheck<{
       description:
         "Detects publicly accessible Git files (.git/config, .git/logs/HEAD, etc.) that may contain sensitive repository information",
       type: "active",
-      tags: ["information-disclosure"],
+      tags: [Tags.INFORMATION_DISCLOSURE],
       severities: [Severity.MEDIUM, Severity.CRITICAL],
       aggressivity: {
         minRequests: 2,

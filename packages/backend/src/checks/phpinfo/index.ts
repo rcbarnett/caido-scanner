@@ -6,6 +6,7 @@ import {
   Severity,
 } from "engine";
 
+import { Tags } from "../../types";
 import { keyStrategy } from "../../utils/key";
 
 const PHPINFO_PATHS = [
@@ -122,7 +123,7 @@ export default defineCheck<{
       description:
         "Detects publicly accessible PHPinfo pages that may contain sensitive PHP environment information",
       type: "active",
-      tags: ["information-disclosure"],
+      tags: [Tags.INFORMATION_DISCLOSURE],
       severities: [Severity.LOW],
       aggressivity: {
         minRequests: 1,
