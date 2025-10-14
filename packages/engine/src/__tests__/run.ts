@@ -55,6 +55,7 @@ export const runCheck = async (
             headers: pair.response.getHeaders(),
             body: pair.response.getBody()?.toText(),
             roundtripTime: pair.response.getRoundtripTime(),
+            createdAt: pair.response.getCreatedAt(),
           }
         : undefined,
     };
