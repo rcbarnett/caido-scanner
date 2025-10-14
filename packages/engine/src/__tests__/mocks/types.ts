@@ -22,8 +22,17 @@ export type MockRequestData = {
 export type MockResponseData = {
   id: string;
   code: number;
+  headers: Record<string, string[]>;
+  body: string | undefined;
+  roundtripTime: number;
+  createdAt: Date;
+};
+
+export type MockResponseDataInput = {
+  id: string;
+  code: number;
   headers?: Record<string, string[]>;
-  body?: string;
+  body?: string | undefined;
   roundtripTime?: number;
   createdAt?: Date;
 };

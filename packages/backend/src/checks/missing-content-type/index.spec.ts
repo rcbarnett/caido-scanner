@@ -67,6 +67,29 @@ describe("Missing Content-Type Check", () => {
     expect(executionHistory).toMatchObject([]);
   });
 
+  it("should not run when response body is empty string", async () => {
+    const request = createMockRequest({
+      id: "6",
+      host: "example.com",
+      method: "GET",
+      path: "/test",
+    });
+
+    const response = createMockResponse({
+      id: "6",
+      code: 200,
+      headers: {},
+      body: "", // Empty string body
+    });
+
+    const executionHistory = await runCheck(missingContentTypeCheck, [
+      { request, response },
+    ]);
+
+    // When check doesn't run, execution history is empty
+    expect(executionHistory).toMatchObject([]);
+  });
+
   it("should find no issues when content-type header is present", async () => {
     const request = createMockRequest({
       id: "3",

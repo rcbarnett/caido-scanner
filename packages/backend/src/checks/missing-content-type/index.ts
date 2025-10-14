@@ -55,8 +55,10 @@ export default defineCheck<Record<never, never>>(({ step }) => {
     },
     initState: () => ({}),
     dedupeKey: keyStrategy().withHost().withPort().withPath().build(),
-    when: (context) =>
-      context.response !== undefined &&
-      context.response.getBody() !== undefined,
+    when: (context) => {
+      if (context.response === undefined) return false;
+      const body = context.response.getBody();
+      return body !== undefined && body.toText().trim() !== "";
+    },
   };
 });

@@ -101,6 +101,7 @@ const useRequests = () => {
               headers: result.response.getHeaders(),
               body: result.response.getBody()?.toText(),
               roundtripTime: result.response.getRoundtripTime(),
+              createdAt: result.response.getCreatedAt(),
             },
           };
         }

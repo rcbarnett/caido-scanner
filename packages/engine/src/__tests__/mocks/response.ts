@@ -1,7 +1,7 @@
 import { type Body, type Response, type ResponseRaw } from "caido:utils";
 
 import { MockBody } from "./request";
-import { type MockResponseData } from "./types";
+import { type MockResponseData, type MockResponseDataInput } from "./types";
 
 export class MockResponseRaw implements ResponseRaw {
   private data: string;
@@ -20,14 +20,14 @@ export class MockResponseRaw implements ResponseRaw {
 }
 
 export class MockResponse implements Response {
-  private mockData: Required<MockResponseData>;
+  private mockData: MockResponseData;
 
-  constructor(data: MockResponseData) {
+  constructor(data: MockResponseDataInput) {
     this.mockData = {
       id: data.id,
       code: data.code,
       headers: data.headers ?? {},
-      body: data.body ?? "",
+      body: data.body,
       roundtripTime: data.roundtripTime ?? 100,
       createdAt: data.createdAt ?? new Date(),
     };
@@ -58,7 +58,9 @@ export class MockResponse implements Response {
   }
 
   getBody(): Body | undefined {
-    return this.mockData.body ? new MockBody(this.mockData.body) : undefined;
+    return this.mockData.body === undefined
+      ? undefined
+      : new MockBody(this.mockData.body);
   }
 
   getRaw(): ResponseRaw {
@@ -81,6 +83,6 @@ export class MockResponse implements Response {
   }
 }
 
-export const createMockResponse = (data: MockResponseData): Response => {
+export const createMockResponse = (data: MockResponseDataInput): Response => {
   return new MockResponse(data);
 };
