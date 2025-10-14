@@ -1,5 +1,6 @@
 import { defineCheck, done, Severity } from "engine";
 
+import { Tags } from "../../types";
 import { findingBuilder, keyStrategy } from "../../utils";
 
 export default defineCheck(({ step }) => {
@@ -58,7 +59,12 @@ export default defineCheck(({ step }) => {
       description:
         "Checks for Content-Security-Policy-Report-Only headers, which indicate CSP is not enforced and only reports violations",
       type: "passive",
-      tags: ["csp", "security-headers", "report-only", "enforcement"],
+      tags: [
+        Tags.CSP,
+        Tags.SECURITY_HEADERS,
+        Tags.REPORT_ONLY,
+        Tags.ENFORCEMENT,
+      ],
       severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },

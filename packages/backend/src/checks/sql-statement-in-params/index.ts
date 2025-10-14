@@ -1,5 +1,6 @@
 import { defineCheck, done, type Finding, Severity } from "engine";
 
+import { Tags } from "../../types";
 import { extractParameters } from "../../utils";
 import { keyStrategy } from "../../utils/key";
 
@@ -232,7 +233,7 @@ export default defineCheck<Record<never, never>>(({ step }) => {
       description:
         "Detects parameters that appear to contain full SQL statements such as UNION SELECT, INSERT, UPDATE, DELETE, DROP, CREATE.",
       type: "passive",
-      tags: ["sqli", "input-validation"],
+      tags: [Tags.SQLI, Tags.INPUT_VALIDATION],
       severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },

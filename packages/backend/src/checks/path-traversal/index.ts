@@ -6,6 +6,7 @@ import {
   Severity,
 } from "engine";
 
+import { Tags } from "../../types";
 import {
   bodyMatchesAny,
   createRequestWithParameter,
@@ -155,7 +156,7 @@ export default defineCheck<{
       description:
         "Detects path traversal vulnerabilities by attempting to access system files and directories",
       type: "active",
-      tags: ["information-disclosure"],
+      tags: [Tags.INFORMATION_DISCLOSURE],
       severities: [Severity.CRITICAL],
       aggressivity: {
         minRequests: 0,

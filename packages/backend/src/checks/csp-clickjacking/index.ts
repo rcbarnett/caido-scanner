@@ -1,6 +1,7 @@
 import { defineCheck, done, Severity } from "engine";
 
 import { CSPParser } from "../../parsers/csp";
+import { Tags } from "../../types";
 import { findingBuilder, keyStrategy } from "../../utils";
 
 export default defineCheck(({ step }) => {
@@ -100,11 +101,11 @@ export default defineCheck(({ step }) => {
         "Checks for missing or overly permissive frame-ancestors directives in Content Security Policy headers, which can lead to clickjacking attacks",
       type: "passive",
       tags: [
-        "csp",
-        "security-headers",
-        "clickjacking",
-        "frame-ancestors",
-        "ui-redressing",
+        Tags.CSP,
+        Tags.SECURITY_HEADERS,
+        Tags.CLICKJACKING,
+        Tags.FRAME_ANCESTORS,
+        Tags.UI_REDRESSING,
       ],
       severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },

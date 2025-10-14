@@ -1,5 +1,6 @@
 import { defineCheck, done, Severity } from "engine";
 
+import { Tags } from "../../types";
 import { keyStrategy } from "../../utils/key";
 
 // Common hash patterns - matching ZAP Proxy coverage
@@ -228,7 +229,12 @@ export default defineCheck<Record<never, never>>(({ step }) => {
       description:
         "Detects exposed cryptographic hashes that may indicate password hash disclosure or other sensitive data exposure",
       type: "passive",
-      tags: ["hash", "password", "information-disclosure", "cryptography"],
+      tags: [
+        Tags.HASH,
+        Tags.PASSWORD,
+        Tags.INFORMATION_DISCLOSURE,
+        Tags.CRYPTOGRAPHY,
+      ],
       severities: [Severity.HIGH, Severity.MEDIUM, Severity.LOW],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },

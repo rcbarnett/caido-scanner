@@ -1,5 +1,6 @@
 import { Severity } from "engine";
 
+import { Tags } from "../../types";
 import { defineResponseRegexCheck } from "../../utils/check";
 
 // Email address regex pattern
@@ -27,7 +28,7 @@ export default defineResponseRegexCheck({
     description:
       "Detects email addresses in HTTP responses that could be used for phishing or spam",
     type: "passive",
-    tags: ["information-disclosure", "sensitive-data"],
+    tags: [Tags.INFORMATION_DISCLOSURE, Tags.SENSITIVE_DATA],
     severities: [Severity.INFO],
     aggressivity: {
       minRequests: 0,

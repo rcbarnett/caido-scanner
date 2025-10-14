@@ -6,6 +6,7 @@ import {
   Severity,
 } from "engine";
 
+import { Tags } from "../../types";
 import {
   createRequestWithParameter,
   extractReflectedParameters,
@@ -370,7 +371,7 @@ export default defineCheck<State>(({ step }) => {
       description:
         "Detects Server-Side Template Injection using mathematical expressions and error signatures",
       type: "active",
-      tags: ["ssti", "injection", "rce", "template"],
+      tags: [Tags.SSTI, Tags.INJECTION, Tags.RCE, Tags.TEMPLATE],
       severities: [Severity.CRITICAL, Severity.HIGH],
       aggressivity: {
         minRequests: 1,

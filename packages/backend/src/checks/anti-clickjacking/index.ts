@@ -1,5 +1,6 @@
 import { defineCheck, done, Severity } from "engine";
 
+import { Tags } from "../../types";
 import { keyStrategy } from "../../utils/key";
 
 export default defineCheck<unknown>(({ step }) => {
@@ -87,7 +88,7 @@ export default defineCheck<unknown>(({ step }) => {
       description:
         "Checks for proper X-Frame-Options header implementation to prevent clickjacking attacks",
       type: "passive",
-      tags: ["clickjacking", "security-headers", "x-frame-options"],
+      tags: [Tags.CLICKJACKING, Tags.SECURITY_HEADERS, Tags.X_FRAME_OPTIONS],
       severities: [Severity.MEDIUM, Severity.LOW],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },

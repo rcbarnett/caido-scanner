@@ -1,5 +1,6 @@
 import { defineCheck, done, Severity } from "engine";
 
+import { Tags } from "../../types";
 import { getSetCookieHeaders, keyStrategy } from "../../utils";
 
 export default defineCheck<unknown>(({ step }) => {
@@ -53,7 +54,7 @@ export default defineCheck<unknown>(({ step }) => {
       description:
         "Checks for cookies set over TLS connections without the Secure flag, which can lead to cookie transmission over unencrypted connections",
       type: "passive",
-      tags: ["cookies", "secure", "tls", "security-headers"],
+      tags: [Tags.COOKIES, Tags.SECURE, Tags.TLS, Tags.SECURITY_HEADERS],
       severities: [Severity.MEDIUM],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },

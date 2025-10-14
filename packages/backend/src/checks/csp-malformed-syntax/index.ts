@@ -1,6 +1,7 @@
 import { defineCheck, done, Severity } from "engine";
 
 import { CSPParser } from "../../parsers/csp";
+import { Tags } from "../../types";
 import { findingBuilder, keyStrategy } from "../../utils";
 
 export default defineCheck(({ step }) => {
@@ -59,7 +60,7 @@ export default defineCheck(({ step }) => {
       description:
         "Checks for malformed Content Security Policy headers that may be ignored by browsers",
       type: "passive",
-      tags: ["csp", "security-headers", "syntax", "validation"],
+      tags: [Tags.CSP, Tags.SECURITY_HEADERS, Tags.SYNTAX, Tags.VALIDATION],
       severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },
     },

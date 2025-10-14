@@ -6,6 +6,7 @@ import {
   Severity,
 } from "engine";
 
+import { Tags } from "../../types";
 import { keyStrategy } from "../../utils/key";
 
 const createOriginTests = (host: string, scheme: string) => {
@@ -273,7 +274,7 @@ export default defineCheck<{
       description:
         "Detects CORS misconfigurations including origin reflection, wildcard bypasses, null origins, and validation bypasses",
       type: "active",
-      tags: ["cors"],
+      tags: [Tags.CORS],
       severities: [Severity.INFO, Severity.LOW],
       aggressivity: {
         minRequests: 0,

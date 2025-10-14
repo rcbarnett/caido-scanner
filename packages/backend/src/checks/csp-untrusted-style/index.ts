@@ -1,6 +1,7 @@
 import { defineCheck, done, Severity } from "engine";
 
 import { CSPParser } from "../../parsers/csp";
+import { Tags } from "../../types";
 import { findingBuilder, keyStrategy } from "../../utils";
 
 export default defineCheck<unknown>(({ step }) => {
@@ -89,11 +90,11 @@ export default defineCheck<unknown>(({ step }) => {
         "Mitigate CSS injection by avoiding 'unsafe-inline', data: URLs, and global wildcards in style directives. Use a secure, random nonce of at least 8 characters 'nonce-RANDOM' to prevent untrusted style execution.",
       type: "passive",
       tags: [
-        "csp",
-        "security-headers",
-        "css-injection",
-        "style-src",
-        "injection",
+        Tags.CSP,
+        Tags.SECURITY_HEADERS,
+        Tags.CSS_INJECTION,
+        Tags.STYLE_SRC,
+        Tags.INJECTION,
       ],
       severities: [Severity.INFO],
       aggressivity: { minRequests: 0, maxRequests: 0 },

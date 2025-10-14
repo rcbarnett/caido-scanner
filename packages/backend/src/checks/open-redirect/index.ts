@@ -9,6 +9,7 @@ import {
   Severity,
 } from "engine";
 
+import { Tags } from "../../types";
 import { keyStrategy } from "../../utils/key";
 
 const keywords = [
@@ -187,7 +188,7 @@ export default defineCheck<{
       description:
         "Checks for open redirects using a variety of URL parser bypass techniques",
       type: "active",
-      tags: ["open-redirect"],
+      tags: [Tags.OPEN_REDIRECT],
       severities: [Severity.MEDIUM],
       aggressivity: {
         minRequests: 1,

@@ -6,6 +6,7 @@ import {
   Severity,
 } from "engine";
 
+import { Tags } from "../../types";
 import {
   bodyMatchesAny,
   createRequestWithParameter,
@@ -312,7 +313,7 @@ export default defineCheck<State>(({ step }) => {
       description:
         "Detects command injection vulnerabilities by attempting to execute system commands and verifying their output",
       type: "active",
-      tags: ["injection", "command-execution"],
+      tags: [Tags.INJECTION, Tags.COMMAND_EXECUTION],
       severities: [Severity.CRITICAL],
       aggressivity: {
         minRequests: 1,

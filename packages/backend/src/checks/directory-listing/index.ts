@@ -6,6 +6,7 @@ import {
   Severity,
 } from "engine";
 
+import { Tags } from "../../types";
 import { keyStrategy } from "../../utils/key";
 
 type State = {
@@ -155,7 +156,7 @@ export default defineCheck<State>(({ step }) => {
       description:
         "Detects web server directory listing exposure by probing directory paths and analyzing responses for listing markers.",
       type: "active",
-      tags: ["information-disclosure"],
+      tags: [Tags.INFORMATION_DISCLOSURE],
       severities: [Severity.LOW, Severity.MEDIUM],
       aggressivity: {
         minRequests: 1,
