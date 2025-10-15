@@ -2,8 +2,6 @@ import antiClickjackingScan from "./anti-clickjacking";
 import applicationErrorsScan from "./application-errors";
 import bigRedirectsScan from "./big-redirects";
 import commandInjectionScan from "./command-injection";
-import cookieHttpOnlyScan from "./cookie-httponly";
-import cookieSecureScan from "./cookie-secure";
 import corsMisconfigScan from "./cors-misconfig";
 import creditCardDisclosureScan from "./credit-card-disclosure";
 import cspAllowlistedScriptsScan from "./csp-allowlisted-scripts";
@@ -41,8 +39,8 @@ export const Checks = {
   APPLICATION_ERRORS: "application-errors",
   BIG_REDIRECTS: "big-redirects",
   COMMAND_INJECTION: "command-injection",
-  COOKIE_HTTPONLY: "cookie-httponly",
-  COOKIE_SECURE: "cookie-secure",
+  // COOKIE_HTTPONLY: "cookie-httponly",
+  // COOKIE_SECURE: "cookie-secure",
   CORS_MISCONFIG: "cors-misconfig",
   CREDIT_CARD_DISCLOSURE: "credit-card-disclosure",
   CSP_ALLOWLISTED_SCRIPTS: "csp-allowlisted-scripts",
@@ -81,8 +79,8 @@ export const checks = [
   applicationErrorsScan,
   bigRedirectsScan,
   commandInjectionScan,
-  cookieHttpOnlyScan,
-  cookieSecureScan,
+  // cookieHttpOnlyScan,
+  // cookieSecureScan,
   corsMisconfigScan,
   creditCardDisclosureScan,
   cspAllowlistedScriptsScan,
