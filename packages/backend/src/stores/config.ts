@@ -108,14 +108,14 @@ export class ConfigStore {
               checkID: Checks.ANTI_CLICKJACKING,
               enabled: false,
             },
-            {
-              checkID: Checks.COOKIE_HTTPONLY,
-              enabled: true,
-            },
-            {
-              checkID: Checks.COOKIE_SECURE,
-              enabled: true,
-            },
+            // {
+            //   checkID: Checks.COOKIE_HTTPONLY,
+            //   enabled: true,
+            // },
+            // {
+            //   checkID: Checks.COOKIE_SECURE,
+            //   enabled: true,
+            // },
             {
               checkID: Checks.SQL_STATEMENT_IN_PARAMS,
               enabled: false,
@@ -291,14 +291,14 @@ export class ConfigStore {
               checkID: Checks.ANTI_CLICKJACKING,
               enabled: true,
             },
-            {
-              checkID: Checks.COOKIE_HTTPONLY,
-              enabled: true,
-            },
-            {
-              checkID: Checks.COOKIE_SECURE,
-              enabled: true,
-            },
+            // {
+            //   checkID: Checks.COOKIE_HTTPONLY,
+            //   enabled: true,
+            // },
+            // {
+            //   checkID: Checks.COOKIE_SECURE,
+            //   enabled: true,
+            // },
             {
               checkID: Checks.SQL_STATEMENT_IN_PARAMS,
               enabled: true,
