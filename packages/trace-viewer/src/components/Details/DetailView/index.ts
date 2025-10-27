@@ -1,1 +1,1 @@
-export { default as DetailView } from './Container.vue'
+export { default as DetailView } from "./Container.vue";

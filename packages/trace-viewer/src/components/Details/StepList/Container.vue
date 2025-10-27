@@ -42,18 +42,10 @@ const { selectedCheck, selectedStepIndex, selectStep } = useTrace();
             />
           </div>
 
-          <div class="text-xs text-surface-300 mb-1">
-            Next:
-            {{ step.result === "continue" ? step.nextStep : "Complete" }}
-          </div>
-
           <div
             class="flex items-center justify-between text-xs text-surface-400"
           >
             <span>{{ step.findings.length }} findings</span>
-            <span v-if="step.findings.length > 0" class="text-orange-400">
-              {{ step.findings.map((f) => f.severity).join(", ") }}
-            </span>
           </div>
         </div>
       </div>

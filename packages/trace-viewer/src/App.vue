@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Navbar } from "@/components/Navbar";
 import { useProvideViewState, useViewState } from "@/composables/useViewState";
 import Details from "@/views/Details.vue";
 import Home from "@/views/Home.vue";
@@ -13,7 +12,6 @@ const { currentView } = useViewState()!;
 
 <template>
   <div class="w-screen h-screen flex flex-col gap-1 p-1">
-    <Navbar />
     <Home v-if="currentView.kind === 'home'" class="flex-1 min-h-0" />
     <Overview
       v-else-if="currentView.kind === 'checks'"

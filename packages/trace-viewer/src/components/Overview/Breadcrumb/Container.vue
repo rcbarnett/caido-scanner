@@ -5,15 +5,13 @@ import { computed } from "vue";
 import { useTrace } from "@/composables/useTrace";
 import { useViewState } from "@/composables/useViewState";
 
-const { selectedCheck, goBackToChecks } = useTrace();
+const { goBackToChecks } = useTrace();
 const viewState = useViewState();
+
 const items = computed(() => [
   {
     label: "Checks",
     command: goBackToChecks,
-  },
-  {
-    label: selectedCheck.value?.checkId ?? "Details",
   },
 ]);
 

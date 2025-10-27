@@ -1,4 +1,5 @@
 import tailwindPrimeui from "tailwindcss-primeui";
+import tailwindcssCaido from "@caido/tailwindcss";
 
 export default {
   content: [
@@ -6,9 +7,6 @@ export default {
     "./src/**/*.{vue,js,ts}",
     "./node_modules/@caido/primevue/dist/primevue.mjs",
   ],
-  theme: {
-    extend: {},
-  },
   darkMode: ["selector", '[data-mode="dark"]'],
-  plugins: [tailwindPrimeui],
+  plugins: [tailwindPrimeui, tailwindcssCaido],
 }

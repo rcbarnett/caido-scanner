@@ -78,7 +78,7 @@ const getSeverityColor = (severity: string) => {
             <div
               v-for="(finding, index) in selectedStep.findings"
               :key="index"
-              class="border p-4"
+              class="border p-4 rounded"
               :class="{
                 'border-red-500 bg-red-900/20':
                   finding.severity === 'critical' ||

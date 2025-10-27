@@ -1,1 +1,1 @@
-export { default as ChecksTable } from './Container.vue'
+export { default as ChecksTable } from "./Container.vue";

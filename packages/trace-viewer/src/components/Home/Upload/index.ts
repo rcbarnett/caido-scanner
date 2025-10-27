@@ -1,1 +1,1 @@
-export { default as Upload } from './Container.vue'
+export { default as Upload } from "./Container.vue";

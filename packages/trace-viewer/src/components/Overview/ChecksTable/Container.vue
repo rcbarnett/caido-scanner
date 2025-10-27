@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import Card from "primevue/card";
 import Column from "primevue/column";
-import DataTable, {
-  DataTableCellEditCancelEvent,
-  type DataTableRowClickEvent,
-} from "primevue/datatable";
+import DataTable, { type DataTableRowClickEvent } from "primevue/datatable";
 import Tag from "primevue/tag";
 
 import { useTrace } from "@/composables/useTrace";
+import { type CheckExecutionRecord } from "@/types";
 
 const { parsedTrace, selectCheck } = useTrace();
 
@@ -24,6 +22,10 @@ const onRowSelect = (event: DataTableRowClickEvent) => {
   if (index !== -1) {
     selectCheck(index);
   }
+};
+
+const getFindingsCount = (check: CheckExecutionRecord) => {
+  return check.steps.reduce((sum, step) => sum + step.findings.length, 0);
 };
 </script>
 
@@ -88,12 +90,7 @@ const onRowSelect = (event: DataTableRowClickEvent) => {
             <Column header="Findings">
               <template #body="{ data }">
                 <div class="text-sm text-surface-300">
-                  {{
-                    data.steps.reduce(
-                      (sum: number, step: any) => sum + step.findings.length,
-                      0,
-                    )
-                  }}
+                  {{ getFindingsCount(data) }}
                 </div>
               </template>
             </Column>
