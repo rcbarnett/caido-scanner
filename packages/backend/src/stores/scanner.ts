@@ -6,6 +6,7 @@ export class ScannerStore {
   private static _store?: ScannerStore;
   private sessions: Map<string, Session> = new Map();
   private runnables: Map<string, ScanRunnable> = new Map();
+  private executionTraces: Map<string, string> = new Map();
 
   private constructor() {}
 
@@ -55,6 +56,7 @@ export class ScannerStore {
       this.runnables.delete(id);
     }
 
+    this.executionTraces.delete(id);
     return this.sessions.delete(id);
   }
 
@@ -275,36 +277,56 @@ export class ScannerStore {
     });
   }
 
-  finishSession(sessionId: string): Session | undefined {
+  finishSession(sessionId: string, trace: string): Session | undefined {
+    this.executionTraces.set(sessionId, trace);
     return this.updateSession(sessionId, (draft) => {
       if (draft.kind !== "Running") {
         throw new Error(`Cannot finish session in state: ${draft.kind}`);
       }
 
-      Object.assign(draft, {
+      const newSession: Session = {
+        ...draft,
         kind: "Done" as const,
         finishedAt: Date.now(),
-      });
+        hasExecutionTrace: true,
+      };
+
+      Object.assign(draft, newSession);
     });
   }
 
   interruptSession(
     sessionId: string,
     reason: InterruptReason,
+    trace: string,
   ): Session | undefined {
+    this.executionTraces.set(sessionId, trace);
     return this.updateSession(sessionId, (draft) => {
       if (draft.kind !== "Running") {
         throw new Error(`Cannot interrupt session in state: ${draft.kind}`);
       }
 
-      Object.assign(draft, {
+      const newSession: Session = {
+        ...draft,
         kind: "Interrupted" as const,
         reason,
-      });
+        hasExecutionTrace: true,
+      };
+
+      Object.assign(draft, newSession);
     });
   }
 
-  errorSession(sessionId: string, error: string): Session | undefined {
+  errorSession(
+    sessionId: string,
+    error: string,
+    trace: string | undefined,
+  ): Session | undefined {
+    const hasExecutionTrace = trace !== undefined;
+    if (hasExecutionTrace) {
+      this.executionTraces.set(sessionId, trace);
+    }
+
     return this.updateSession(sessionId, (draft) => {
       if (
         draft.kind === "Done" ||
@@ -314,10 +336,14 @@ export class ScannerStore {
         throw new Error(`Cannot error session in state: ${draft.kind}`);
       }
 
-      Object.assign(draft, {
+      const newSession: Session = {
+        ...draft,
         kind: "Error" as const,
         error,
-      });
+        hasExecutionTrace,
+      };
+
+      Object.assign(draft, newSession);
     });
   }
 
@@ -335,6 +361,19 @@ export class ScannerStore {
     const newSession = create(session, updater);
     this.sessions.set(id, newSession);
     return newSession;
+  }
+
+  setExecutionTrace(sessionId: string, trace: string): Session | undefined {
+    this.executionTraces.set(sessionId, trace);
+    return this.updateSession(sessionId, (draft) => {
+      if (draft.kind === "Done" || draft.kind === "Interrupted") {
+        draft.hasExecutionTrace = true;
+      }
+    });
+  }
+
+  getExecutionTrace(sessionId: string): string | undefined {
+    return this.executionTraces.get(sessionId);
   }
 
   private findCheckExecution(

@@ -12,6 +12,7 @@ import { ChecksStore } from "../../stores/checks";
 import { ConfigStore } from "../../stores/config";
 import { ScannerStore } from "../../stores/scanner";
 import { type BackendSDK } from "../../types";
+import { packExecutionHistory } from "../../utils/debug";
 import { validateInput } from "../../utils/validation";
 
 export const startActiveScan = (
@@ -195,9 +196,12 @@ export const startActiveScan = (
       );
 
       const result = await runnable.run(requestIDs);
+      const executionHistory = runnable.getExecutionHistory();
+      const trace = packExecutionHistory(executionHistory);
+
       switch (result.kind) {
         case "Finished": {
-          const finishedSession = scannerStore.finishSession(id);
+          const finishedSession = scannerStore.finishSession(id, trace);
           if (!finishedSession) break;
 
           sdk.api.send("session:updated", id, finishedSession);
@@ -207,6 +211,7 @@ export const startActiveScan = (
           const interruptedSession = scannerStore.interruptSession(
             id,
             result.reason,
+            trace,
           );
           if (!interruptedSession) break;
 
@@ -214,7 +219,11 @@ export const startActiveScan = (
           break;
         }
         case "Error": {
-          const errorSession = scannerStore.errorSession(id, result.error);
+          const errorSession = scannerStore.errorSession(
+            id,
+            result.error,
+            trace,
+          );
           if (!errorSession) break;
 
           sdk.api.send("session:updated", id, errorSession);
@@ -225,6 +234,7 @@ export const startActiveScan = (
       const errorSession = scannerStore.errorSession(
         id,
         err instanceof Error ? err.message : "Unknown error",
+        undefined,
       );
       if (!errorSession) return;
       sdk.api.send("session:updated", id, errorSession);

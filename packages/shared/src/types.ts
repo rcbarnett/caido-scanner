@@ -132,6 +132,7 @@ export type Session =
       startedAt: number;
       finishedAt: number;
       progress: SessionProgress;
+      hasExecutionTrace: boolean;
     }
   | {
       kind: "Interrupted";
@@ -141,6 +142,7 @@ export type Session =
       startedAt: number;
       progress: SessionProgress;
       reason: InterruptReason;
+      hasExecutionTrace: boolean;
     }
   | {
       kind: "Error";
@@ -148,6 +150,7 @@ export type Session =
       title: string;
       createdAt: number;
       error: string;
+      hasExecutionTrace: boolean;
     };
 
 export type ScanRequestPayload = {

@@ -18,6 +18,7 @@ import {
 import { ChecksStore } from "./stores/checks";
 import { ConfigStore } from "./stores/config";
 import { QueueStore } from "./stores/queue";
+import { ScannerStore } from "./stores/scanner";
 import { type BackendSDK } from "./types";
 import { TaskQueue } from "./utils/task-queue";
 import { validateInput } from "./utils/validation";
@@ -45,6 +46,7 @@ export type API = DefineAPI<{
   deleteScanSession: typeof deleteScanSession;
   getRequestResponse: typeof getRequestResponse;
   updateSessionTitle: typeof updateSessionTitle;
+  getExecutionTrace: typeof getExecutionTrace;
 }>;
 
 export function init(sdk: BackendSDK) {
@@ -61,6 +63,7 @@ export function init(sdk: BackendSDK) {
   sdk.api.register("deleteScanSession", deleteScanSession);
   sdk.api.register("getRequestResponse", getRequestResponse);
   sdk.api.register("updateSessionTitle", updateSessionTitle);
+  sdk.api.register("getExecutionTrace", getExecutionTrace);
 
   const checksStore = ChecksStore.get();
   checksStore.register(...checks);
@@ -189,6 +192,25 @@ export const getRequestResponse = async (
       raw: response.getRaw().toText(),
     },
   });
+};
+
+export const getExecutionTrace = (
+  sdk: BackendSDK,
+  sessionId: string,
+): Result<string> => {
+  const validation = validateInput(IdSchema, sessionId);
+  if (validation.kind === "Error") {
+    return validation;
+  }
+
+  const scannerStore = ScannerStore.get();
+  const trace = scannerStore.getExecutionTrace(validation.value);
+
+  if (trace === undefined) {
+    return error("Execution trace not found");
+  }
+
+  return ok(trace);
 };
 
 const Uint8ArrayToString = (data: Uint8Array) => {
