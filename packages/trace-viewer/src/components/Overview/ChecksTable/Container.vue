@@ -3,11 +3,19 @@ import Card from "primevue/card";
 import Column from "primevue/column";
 import DataTable, { type DataTableRowClickEvent } from "primevue/datatable";
 import Tag from "primevue/tag";
+import { computed } from "vue";
 
 import { useTrace } from "@/composables/useTrace";
 import { type CheckExecutionRecord } from "@/types";
 
 const { parsedTrace, selectCheck } = useTrace();
+
+const executionHistoryWithFindingsCount = computed(() => {
+  return parsedTrace.value.executionHistory.map((check) => ({
+    ...check,
+    findingsCount: getFindingsCount(check),
+  }));
+});
 
 const getSeverityColor = (status: string) => {
   return status === "completed" ? "success" : "danger";
@@ -49,20 +57,20 @@ const getFindingsCount = (check: CheckExecutionRecord) => {
       <template #content>
         <div class="flex-1 overflow-hidden">
           <DataTable
-            :value="parsedTrace.executionHistory"
+            :value="executionHistoryWithFindingsCount"
             selection-mode="single"
             data-key="checkId"
             scroll-height="flex"
             scrollable
             @row-click="onRowSelect"
           >
-            <Column field="checkId" header="Check ID" sortable>
+            <Column field="checkId" header="Check ID">
               <template #body="{ data }">
                 <div class="font-medium text-surface-0">{{ data.checkId }}</div>
               </template>
             </Column>
 
-            <Column field="targetRequestId" header="Target Request" sortable>
+            <Column field="targetRequestId" header="Target Request">
               <template #body="{ data }">
                 <div class="text-sm text-surface-300">
                   {{ data.targetRequestId }}
@@ -70,7 +78,7 @@ const getFindingsCount = (check: CheckExecutionRecord) => {
               </template>
             </Column>
 
-            <Column field="status" header="Status" sortable>
+            <Column field="status" header="Status">
               <template #body="{ data }">
                 <Tag
                   :value="data.status"
@@ -79,7 +87,7 @@ const getFindingsCount = (check: CheckExecutionRecord) => {
               </template>
             </Column>
 
-            <Column field="steps.length" header="Steps" sortable>
+            <Column field="steps.length" header="Steps">
               <template #body="{ data }">
                 <div class="text-sm text-surface-300">
                   {{ data.steps.length }}
@@ -87,7 +95,7 @@ const getFindingsCount = (check: CheckExecutionRecord) => {
               </template>
             </Column>
 
-            <Column header="Findings">
+            <Column field="findingsCount" header="Findings">
               <template #body="{ data }">
                 <div class="text-sm text-surface-300">
                   {{ getFindingsCount(data) }}
