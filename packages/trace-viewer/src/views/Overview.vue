@@ -4,6 +4,6 @@ import { ChecksTable } from "@/components/Overview/ChecksTable";
 
 <template>
   <div>
-    <ChecksTable class="w-1/3 h-1/4" />
+    <ChecksTable class="size-full" />
   </div>
 </template>

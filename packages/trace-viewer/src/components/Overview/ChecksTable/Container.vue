@@ -26,9 +26,12 @@ const onRowSelect = (event: any) => {
 
 <template>
   <div class="flex flex-col min-h-0">
-    <Card class="h-full" :pt="{ content: 'h-full flex flex-col' }">
+    <Card
+      class="h-full"
+      :pt="{ content: 'min-h-0 flex flex-col', body: 'flex flex-col h-full' }"
+    >
       <template #title>
-        <div>
+        <div class="px-4 py-4">
           <h2 class="text-lg font-semibold text-surface-0">Checks</h2>
           <p class="text-sm text-surface-300">
             {{ parsedTrace.totalChecks }} checks,
@@ -42,20 +45,10 @@ const onRowSelect = (event: any) => {
         <div class="flex-1 overflow-hidden">
           <DataTable
             :value="parsedTrace.executionHistory"
-            :paginator="true"
-            :rows="20"
-            :rows-per-page-options="[10, 20, 50, 100]"
-            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} checks"
-            class="h-full"
-            :pt="{
-              table: 'h-full',
-              tbody: 'h-full',
-              wrapper: 'h-full flex flex-col',
-              content: 'flex-1 overflow-auto',
-            }"
             selection-mode="single"
             data-key="checkId"
+            scroll-height="flex"
+            scrollable
             @row-click="onRowSelect"
           >
             <Column field="checkId" header="Check ID" sortable>
@@ -120,6 +113,10 @@ const onRowSelect = (event: any) => {
             </Column>
           </DataTable>
         </div>
+      </template>
+
+      <template #footer>
+        <div class="px-4 py-4"></div>
       </template>
     </Card>
   </div>
