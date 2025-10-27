@@ -3,8 +3,8 @@ import Button from "primevue/button";
 import Card from "primevue/card";
 
 import { CheckList } from "@/components/CheckList";
-import { StepList } from "@/components/Details/StepList";
 import { StateViewer } from "@/components/Details/StateViewer";
+import { StepList } from "@/components/Details/StepList";
 import { useTrace } from "@/composables/useTrace";
 
 const { parsedTrace, clearTrace } = useTrace();
@@ -20,7 +20,9 @@ const { parsedTrace, clearTrace } = useTrace();
             <div>
               <h1 class="text-xl font-semibold text-surface-0">Trace Viewer</h1>
               <p class="text-sm text-surface-300">
-                {{ parsedTrace.totalChecks }} checks • {{ parsedTrace.totalSteps }} steps • {{ parsedTrace.totalFindings }} findings
+                {{ parsedTrace.totalChecks }} checks •
+                {{ parsedTrace.totalSteps }} steps •
+                {{ parsedTrace.totalFindings }} findings
               </p>
             </div>
             <Button

@@ -23,7 +23,7 @@ const home = {
 </script>
 
 <template>
-  <div class="p-4 border-b border-surface-600 bg-surface-800">
+  <div class="p-4 bg-surface-800 rounded">
     <Breadcrumb :model="items" :home="home" />
   </div>
 </template>

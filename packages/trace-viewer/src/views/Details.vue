@@ -3,5 +3,5 @@ import { DetailView } from "@/components/Details/DetailView";
 </script>
 
 <template>
-  <DetailView class="w-full h-full" />
+  <DetailView />
 </template>

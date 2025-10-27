@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import Card from "primevue/card";
 import Column from "primevue/column";
-import DataTable from "primevue/datatable";
+import DataTable, {
+  DataTableCellEditCancelEvent,
+  type DataTableRowClickEvent,
+} from "primevue/datatable";
 import Tag from "primevue/tag";
 
 import { useTrace } from "@/composables/useTrace";
@@ -12,8 +15,8 @@ const getSeverityColor = (status: string) => {
   return status === "completed" ? "success" : "danger";
 };
 
-const onRowSelect = (event: any) => {
-  const index = parsedTrace.executionHistory.findIndex(
+const onRowSelect = (event: DataTableRowClickEvent) => {
+  const index = parsedTrace.value.executionHistory.findIndex(
     (check) =>
       check.checkId === event.data.checkId &&
       check.targetRequestId === event.data.targetRequestId,
