@@ -2,7 +2,7 @@
 import Card from "primevue/card";
 import Tag from "primevue/tag";
 
-import { useTrace } from "@/utils/useTrace";
+import { useTrace } from "@/composables/useTrace";
 
 const { selectedCheck, selectedStepIndex, selectStep } = useTrace();
 </script>
@@ -14,13 +14,17 @@ const { selectedCheck, selectedStepIndex, selectStep } = useTrace();
         <div>
           <h2 class="text-lg font-semibold text-surface-0">Steps</h2>
           <p v-if="selectedCheck" class="text-sm text-surface-300">
-            {{ selectedCheck.steps.length }} steps for {{ selectedCheck.checkId }}
+            {{ selectedCheck.steps.length }} steps for
+            {{ selectedCheck.checkId }}
           </p>
         </div>
       </template>
 
       <template #content>
-        <div v-if="!selectedCheck" class="flex-1 flex items-center justify-center">
+        <div
+          v-if="!selectedCheck"
+          class="flex-1 flex items-center justify-center"
+        >
           <p class="text-surface-400">Select a check to view steps</p>
         </div>
 
@@ -31,8 +35,10 @@ const { selectedCheck, selectedStepIndex, selectStep } = useTrace();
               :key="`${step.stepName}-${index}`"
               class="p-3 rounded-lg cursor-pointer transition-colors border"
               :class="{
-                'bg-primary-900/20 border-primary-500': selectedStepIndex === index,
-                'bg-surface-700 hover:bg-surface-600 border-surface-600': selectedStepIndex !== index
+                'bg-primary-900/20 border-primary-500':
+                  selectedStepIndex === index,
+                'bg-surface-700 hover:bg-surface-600 border-surface-600':
+                  selectedStepIndex !== index,
               }"
               @click="selectStep(index)"
             >
@@ -45,15 +51,18 @@ const { selectedCheck, selectedStepIndex, selectStep } = useTrace();
                   :severity="step.result === 'done' ? 'success' : 'warning'"
                 />
               </div>
-              
+
               <div class="text-xs text-surface-300 mb-1">
-                Next: {{ step.result === 'continue' ? step.nextStep : 'Complete' }}
+                Next:
+                {{ step.result === "continue" ? step.nextStep : "Complete" }}
               </div>
-              
-              <div class="flex items-center justify-between text-xs text-surface-400">
+
+              <div
+                class="flex items-center justify-between text-xs text-surface-400"
+              >
                 <span>{{ step.findings.length }} findings</span>
                 <span v-if="step.findings.length > 0" class="text-orange-400">
-                  {{ step.findings.map(f => f.severity).join(', ') }}
+                  {{ step.findings.map((f) => f.severity).join(", ") }}
                 </span>
               </div>
             </div>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import Breadcrumb from "primevue/breadcrumb";
+import { computed } from "vue";
 
-import { useTrace } from "@/utils/useTrace";
+import { useTrace } from "@/composables/useTrace";
 
 const { selectedCheck, goBackToChecks } = useTrace();
 

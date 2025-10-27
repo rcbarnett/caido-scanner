@@ -4,7 +4,7 @@ import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import Tag from "primevue/tag";
 
-import { useTrace } from "@/utils/useTrace";
+import { useTrace } from "@/composables/useTrace";
 
 const { parsedTrace, selectCheck } = useTrace();
 

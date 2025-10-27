@@ -4,7 +4,7 @@ import Card from "primevue/card";
 import Message from "primevue/message";
 import { ref } from "vue";
 
-import { useTrace } from "@/utils/useTrace";
+import { useTrace } from "@/composables/useTrace";
 
 const emit = defineEmits<{
   traceLoaded: [];

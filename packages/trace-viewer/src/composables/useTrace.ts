@@ -1,8 +1,9 @@
 import { computed, ref } from "vue";
 
+import { useViewState } from "./useViewState";
+
 import type {
   CheckExecutionRecord,
-  CurrentView,
   ExecutionHistory,
   ParsedTrace,
   StepExecutionRecord,
@@ -11,9 +12,10 @@ import type {
 const executionHistory = ref<ExecutionHistory>([]);
 const selectedCheckIndex = ref<number>(-1);
 const selectedStepIndex = ref<number>(-1);
-const currentView = ref<CurrentView>({ kind: "home" });
 
 export const useTrace = () => {
+  const viewState = useViewState();
+
   const loadTrace = (traceData: string) => {
     try {
       const decoded = atob(traceData);
@@ -22,7 +24,7 @@ export const useTrace = () => {
       executionHistory.value = parsed;
       selectedCheckIndex.value = -1;
       selectedStepIndex.value = -1;
-      currentView.value = { kind: "checks", executionHistory: parsed };
+      viewState?.goToChecks(parsed);
 
       return { success: true, error: null };
     } catch (error) {
@@ -37,10 +39,10 @@ export const useTrace = () => {
   const selectCheck = (index: number) => {
     selectedCheckIndex.value = index;
     selectedStepIndex.value = -1;
-    currentView.value = {
-      kind: "details",
-      executionHistory: executionHistory.value,
-    };
+    const check = executionHistory.value[index];
+    if (check) {
+      viewState?.goToDetails(check);
+    }
   };
 
   const selectStep = (index: number) => {
@@ -48,10 +50,7 @@ export const useTrace = () => {
   };
 
   const goBackToChecks = () => {
-    currentView.value = {
-      kind: "checks",
-      executionHistory: executionHistory.value,
-    };
+    viewState?.goToChecks(executionHistory.value);
     selectedCheckIndex.value = -1;
     selectedStepIndex.value = -1;
   };
@@ -60,7 +59,7 @@ export const useTrace = () => {
     executionHistory.value = [];
     selectedCheckIndex.value = -1;
     selectedStepIndex.value = -1;
-    currentView.value = { kind: "home" };
+    viewState?.goHome();
   };
 
   const parsedTrace = computed((): ParsedTrace => {
@@ -111,7 +110,6 @@ export const useTrace = () => {
     executionHistory,
     selectedCheckIndex,
     selectedStepIndex,
-    currentView,
 
     // Computed
     parsedTrace,

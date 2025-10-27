@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { Navbar } from "@/components/Navbar";
-import { useTrace } from "@/utils/useTrace";
+import { useProvideViewState, useViewState } from "@/composables/useViewState";
 import Details from "@/views/Details.vue";
 import Home from "@/views/Home.vue";
 import Overview from "@/views/Overview.vue";
 
-const { currentView } = useTrace();
+// Provide the view state at the root level
+useProvideViewState();
+
+const { currentView } = useViewState()!;
 </script>
 
 <template>

@@ -2,7 +2,7 @@
 import Card from "primevue/card";
 import Tag from "primevue/tag";
 
-import { useTrace } from "@/utils/useTrace";
+import { useTrace } from "@/composables/useTrace";
 
 const { selectedStep } = useTrace();
 

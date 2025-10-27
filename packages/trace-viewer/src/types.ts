@@ -70,4 +70,4 @@ export type ParsedTrace = {
 export type CurrentView =
   | { kind: "home" }
   | { kind: "checks"; executionHistory: ExecutionHistory }
-  | { kind: "details"; executionHistory: ExecutionHistory };
+  | { kind: "details"; check: CheckExecutionRecord };

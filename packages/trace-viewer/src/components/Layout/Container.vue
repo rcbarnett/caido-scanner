@@ -5,7 +5,7 @@ import Card from "primevue/card";
 import { CheckList } from "@/components/CheckList";
 import { StepList } from "@/components/Details/StepList";
 import { StateViewer } from "@/components/Details/StateViewer";
-import { useTrace } from "@/utils/useTrace";
+import { useTrace } from "@/composables/useTrace";
 
 const { parsedTrace, clearTrace } = useTrace();
 </script>
