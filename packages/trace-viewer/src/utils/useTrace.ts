@@ -4,6 +4,7 @@ import type { ExecutionHistory, CheckExecutionRecord, StepExecutionRecord, Parse
 const executionHistory = ref<ExecutionHistory>([])
 const selectedCheckIndex = ref<number>(-1)
 const selectedStepIndex = ref<number>(-1)
+const currentView = ref<'checks' | 'details'>('checks')
 
 export const useTrace = () => {
   const loadTrace = (traceData: string) => {
@@ -14,6 +15,7 @@ export const useTrace = () => {
       executionHistory.value = parsed
       selectedCheckIndex.value = -1
       selectedStepIndex.value = -1
+      currentView.value = 'checks'
       
       return { success: true, error: null }
     } catch (error) {
@@ -27,16 +29,24 @@ export const useTrace = () => {
   const selectCheck = (index: number) => {
     selectedCheckIndex.value = index
     selectedStepIndex.value = -1
+    currentView.value = 'details'
   }
 
   const selectStep = (index: number) => {
     selectedStepIndex.value = index
   }
 
+  const goBackToChecks = () => {
+    currentView.value = 'checks'
+    selectedCheckIndex.value = -1
+    selectedStepIndex.value = -1
+  }
+
   const clearTrace = () => {
     executionHistory.value = []
     selectedCheckIndex.value = -1
     selectedStepIndex.value = -1
+    currentView.value = 'checks'
   }
 
   const parsedTrace = computed((): ParsedTrace => {
@@ -76,6 +86,7 @@ export const useTrace = () => {
     executionHistory,
     selectedCheckIndex,
     selectedStepIndex,
+    currentView,
     
     // Computed
     parsedTrace,
@@ -87,6 +98,7 @@ export const useTrace = () => {
     loadTrace,
     selectCheck,
     selectStep,
+    goBackToChecks,
     clearTrace
   }
 }

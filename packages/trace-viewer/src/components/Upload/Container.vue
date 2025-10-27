@@ -104,7 +104,7 @@ const processFile = async (file: File) => {
               />
               <Button
                 label="Choose File"
-                icon="pi pi-upload"
+                icon="fas fa-upload"
                 @click="fileInput?.click()"
               />
             </div>

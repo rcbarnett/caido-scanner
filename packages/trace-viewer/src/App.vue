@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { Layout } from "@/components/Layout";
+import { DetailView } from "@/components/DetailView";
 import { Upload } from "@/components/Upload";
+import { ChecksTable } from "@/components/ChecksTable";
+
 import { useTrace } from "@/utils/useTrace";
 
-const { hasTrace } = useTrace();
+const { hasTrace, currentView } = useTrace();
 
 const handleTraceLoaded = () => {
   // Trace is loaded via the composable, no additional action needed
@@ -13,6 +15,7 @@ const handleTraceLoaded = () => {
 <template>
   <div id="app">
     <Upload v-if="!hasTrace" @trace-loaded="handleTraceLoaded" />
-    <Layout v-else />
+    <ChecksTable v-else-if="currentView === 'checks'" />
+    <DetailView v-else />
   </div>
 </template>

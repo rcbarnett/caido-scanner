@@ -25,7 +25,7 @@ const { parsedTrace, clearTrace } = useTrace();
             </div>
             <Button
               label="Load New Trace"
-              icon="pi pi-refresh"
+              icon="fas fa-refresh"
               severity="secondary"
               @click="clearTrace"
             />
