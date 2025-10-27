@@ -61,7 +61,7 @@ const processFile = async (file: File) => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-surface-800">
+  <div class="flex items-center justify-center">
     <div class="w-full max-w-md">
       <Card class="p-8">
         <template #title>

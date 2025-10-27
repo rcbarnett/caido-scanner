@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import DataTable from "primevue/datatable";
+import Card from "primevue/card";
 import Column from "primevue/column";
+import DataTable from "primevue/datatable";
 import Tag from "primevue/tag";
 
 import { useTrace } from "@/utils/useTrace";
@@ -13,7 +14,9 @@ const getSeverityColor = (status: string) => {
 
 const onRowSelect = (event: any) => {
   const index = parsedTrace.executionHistory.findIndex(
-    (check) => check.checkId === event.data.checkId && check.targetRequestId === event.data.targetRequestId
+    (check) =>
+      check.checkId === event.data.checkId &&
+      check.targetRequestId === event.data.targetRequestId,
   );
   if (index !== -1) {
     selectCheck(index);
@@ -22,13 +25,14 @@ const onRowSelect = (event: any) => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col">
+  <div class="flex flex-col min-h-0">
     <Card class="h-full" :pt="{ content: 'h-full flex flex-col' }">
       <template #title>
         <div>
           <h2 class="text-lg font-semibold text-surface-0">Checks</h2>
           <p class="text-sm text-surface-300">
-            {{ parsedTrace.totalChecks }} checks, {{ parsedTrace.totalSteps }} steps,
+            {{ parsedTrace.totalChecks }} checks,
+            {{ parsedTrace.totalSteps }} steps,
             {{ parsedTrace.totalFindings }} findings
           </p>
         </div>
@@ -40,19 +44,19 @@ const onRowSelect = (event: any) => {
             :value="parsedTrace.executionHistory"
             :paginator="true"
             :rows="20"
-            :rowsPerPageOptions="[10, 20, 50, 100]"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} checks"
+            :rows-per-page-options="[10, 20, 50, 100]"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} checks"
             class="h-full"
             :pt="{
               table: 'h-full',
               tbody: 'h-full',
               wrapper: 'h-full flex flex-col',
-              content: 'flex-1 overflow-auto'
+              content: 'flex-1 overflow-auto',
             }"
-            @row-click="onRowSelect"
             selection-mode="single"
             data-key="checkId"
+            @row-click="onRowSelect"
           >
             <Column field="checkId" header="Check ID" sortable>
               <template #body="{ data }">
@@ -62,7 +66,9 @@ const onRowSelect = (event: any) => {
 
             <Column field="targetRequestId" header="Target Request" sortable>
               <template #body="{ data }">
-                <div class="text-sm text-surface-300">{{ data.targetRequestId }}</div>
+                <div class="text-sm text-surface-300">
+                  {{ data.targetRequestId }}
+                </div>
               </template>
             </Column>
 
@@ -77,21 +83,36 @@ const onRowSelect = (event: any) => {
 
             <Column field="steps.length" header="Steps" sortable>
               <template #body="{ data }">
-                <div class="text-sm text-surface-300">{{ data.steps.length }}</div>
+                <div class="text-sm text-surface-300">
+                  {{ data.steps.length }}
+                </div>
               </template>
             </Column>
 
             <Column header="Findings">
               <template #body="{ data }">
                 <div class="text-sm text-surface-300">
-                  {{ data.steps.reduce((sum: number, step: any) => sum + step.findings.length, 0) }}
+                  {{
+                    data.steps.reduce(
+                      (sum: number, step: any) => sum + step.findings.length,
+                      0,
+                    )
+                  }}
                 </div>
               </template>
             </Column>
 
-            <Column header="Error" v-if="parsedTrace.executionHistory.some(c => c.status === 'failed')">
+            <Column
+              v-if="
+                parsedTrace.executionHistory.some((c) => c.status === 'failed')
+              "
+              header="Error"
+            >
               <template #body="{ data }">
-                <div v-if="data.status === 'failed'" class="text-sm text-red-400 truncate max-w-xs">
+                <div
+                  v-if="data.status === 'failed'"
+                  class="text-sm text-red-400 truncate max-w-xs"
+                >
                   {{ data.error.message }}
                 </div>
                 <div v-else class="text-sm text-surface-400">-</div>

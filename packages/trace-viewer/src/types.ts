@@ -22,22 +22,23 @@ export type Finding = {
   };
 };
 
-export type JSONSerializable = 
-  | string 
-  | number 
-  | boolean 
-  | null 
-  | JSONSerializable[] 
-  | { [key: string]: JSONSerializable };
-
-export type CheckOutput = JSONSerializable | undefined;
+export type CheckOutput = unknown;
 
 export type StepExecutionRecord = {
   stepName: string;
-  stateBefore: JSONSerializable;
-  stateAfter: JSONSerializable;
+  stateBefore: Record<string, unknown>;
+  stateAfter: Record<string, unknown>;
   findings: Finding[];
 } & ({ result: "done" } | { result: "continue"; nextStep: string });
+
+export enum ScanRunnableErrorCode {
+  INTERRUPTED = "INTERRUPTED",
+  REQUEST_NOT_FOUND = "REQUEST_NOT_FOUND",
+  SCAN_ALREADY_RUNNING = "SCAN_ALREADY_RUNNING",
+  RUNTIME_ERROR = "RUNTIME_ERROR",
+  UNKNOWN_CHECK_ERROR = "UNKNOWN_CHECK_ERROR",
+  REQUEST_FAILED = "REQUEST_FAILED",
+}
 
 export type CheckExecutionRecord = {
   checkId: string;
@@ -51,7 +52,7 @@ export type CheckExecutionRecord = {
   | {
       status: "failed";
       error: {
-        code: string;
+        code: ScanRunnableErrorCode;
         message: string;
       };
     }
@@ -65,3 +66,8 @@ export type ParsedTrace = {
   totalSteps: number;
   totalFindings: number;
 };
+
+export type CurrentView =
+  | { kind: "home" }
+  | { kind: "checks"; executionHistory: ExecutionHistory }
+  | { kind: "details"; executionHistory: ExecutionHistory };

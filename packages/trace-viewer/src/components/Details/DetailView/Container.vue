@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { BreadcrumbNav } from "@/components/Breadcrumb";
-import { StateViewer } from "@/components/StateViewer";
-import { StepList } from "@/components/StepList";
+import { BreadcrumbNav } from "@/components/Details/Breadcrumb";
+import { StateViewer } from "@/components/Details/StateViewer";
+import { StepList } from "@/components/Details/StepList";
 </script>
 
 <template>

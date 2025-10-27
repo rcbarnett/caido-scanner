@@ -3,8 +3,8 @@ import Button from "primevue/button";
 import Card from "primevue/card";
 
 import { CheckList } from "@/components/CheckList";
-import { StepList } from "@/components/StepList";
-import { StateViewer } from "@/components/StateViewer";
+import { StepList } from "@/components/Details/StepList";
+import { StateViewer } from "@/components/Details/StateViewer";
 import { useTrace } from "@/utils/useTrace";
 
 const { parsedTrace, clearTrace } = useTrace();
