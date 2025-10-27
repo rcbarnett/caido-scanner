@@ -12,7 +12,8 @@
     "lint": "eslint --fix packages/*/src",
     "test": "vitest run",
     "validate": "pnpm run typecheck && pnpm run lint && pnpm run test",
-    "generate:parsers": "pnpm -r run generate:parsers"
+    "generate:parsers": "pnpm -r run generate:parsers",
+    "trace-viewer": "pnpm --filter trace-viewer dev"
   },
   "devDependencies": {
     "@caido-community/dev": "^0.1.6",
