@@ -8,70 +8,329 @@ import { describe, expect, it } from "vitest";
 
 import userAgentCheck from "./index";
 
-type HandlerConfig = {
-  statusDifference?: boolean;
-  bodyDelta?: number;
-  mobileBodyUndefined?: boolean;
-};
-
-const buildSendHandler = (config: HandlerConfig = {}): SendHandler => {
-  return (spec) => {
-    const userAgentHeader = spec.getHeader("User-Agent");
-    const userAgent = userAgentHeader?.[0] ?? "";
-
-    const isMobile = userAgent.toLowerCase().includes("mobile");
-
-    let body: string | undefined = "identical response";
-    if (config.bodyDelta !== undefined && isMobile === true) {
-      body = `${body}${"x".repeat(config.bodyDelta)}`;
-    }
-    if (config.mobileBodyUndefined === true && isMobile === true) {
-      body = undefined;
-    }
-
-    const mockRequest = createMockRequest({
-      id: `sent-${userAgent}`,
-      host: spec.getHost(),
-      method: spec.getMethod(),
-      path: spec.getPath(),
-      headers: spec.getHeaders(),
-    });
-
-    const shouldRedirect =
-      config.statusDifference === true && isMobile === true;
-    const mockResponse = createMockResponse({
-      id: `resp-${userAgent}`,
-      code: shouldRedirect ? 302 : 200,
-      headers: { "content-type": ["text/html"] },
-      body,
-    });
-
-    return Promise.resolve({ request: mockRequest, response: mockResponse });
-  };
-};
-
-describe("User agent dependent response check", () => {
-  it("does not flag when responses are identical", async () => {
+describe("user-agent-dependent-response check", () => {
+  it("should not flag when responses are identical", async () => {
     const request = createMockRequest({
-      id: "req-1",
+      id: "1",
       host: "example.com",
       method: "GET",
       path: "/",
-      headers: { "User-Agent": ["Original UA"] },
     });
 
     const response = createMockResponse({
-      id: "res-1",
+      id: "1",
       code: 200,
-      headers: { "content-type": ["text/html"] },
-      body: "identical response",
+      headers: {},
+      body: "test response",
     });
 
-    const executionHistory = await runCheck(
-      userAgentCheck,
-      [{ request, response }],
-      { sendHandler: buildSendHandler() },
-    );
+    const sendHandler: SendHandler = (spec) => {
+      const mockRequest = createMockRequest({
+        id: "2",
+        host: spec.getHost(),
+        method: spec.getMethod(),
+        path: spec.getPath(),
+      });
+
+      const mockResponse = createMockResponse({
+        id: "2",
+        code: 200,
+        headers: {},
+        body: "test response",
+      });
+
+      return Promise.resolve({ request: mockRequest, response: mockResponse });
+    };
+
+    const executionHistory = await runCheck(userAgentCheck, [
+      { request, response },
+    ], { sendHandler });
+
+    expect(executionHistory).toEqual([
+      {
+        checkId: "user-agent-dependent-response",
+        targetRequestId: "1",
+        steps: [
+          {
+            stepName: "probeUserAgents",
+            stateBefore: {
+              originalStatus: 0,
+              originalLength: 0,
+              probes: [],
+            },
+            stateAfter: {
+              originalStatus: 200,
+              originalLength: 13,
+              probes: [
+                {
+                  userAgent: "desktop",
+                  responseCode: 200,
+                  bodyLength: 13,
+                },
+                {
+                  userAgent: "mobile",
+                  responseCode: 200,
+                  bodyLength: 13,
+                },
+              ],
+            },
+            findings: [],
+            result: "continue",
+            nextStep: "evaluateDifferences",
+          },
+          {
+            stepName: "evaluateDifferences",
+            stateBefore: {
+              originalStatus: 200,
+              originalLength: 13,
+              probes: [
+                {
+                  userAgent: "desktop",
+                  responseCode: 200,
+                  bodyLength: 13,
+                },
+                {
+                  userAgent: "mobile",
+                  responseCode: 200,
+                  bodyLength: 13,
+                },
+              ],
+            },
+            stateAfter: {
+              originalStatus: 200,
+              originalLength: 13,
+              probes: [
+                {
+                  userAgent: "desktop",
+                  responseCode: 200,
+                  bodyLength: 13,
+                },
+                {
+                  userAgent: "mobile",
+                  responseCode: 200,
+                  bodyLength: 13,
+                },
+              ],
+            },
+            findings: [],
+            result: "done",
+          },
+        ],
+        status: "completed",
+      },
+    ]);
+  });
+
+  it("should flag when status code differs", async () => {
+    const request = createMockRequest({
+      id: "1",
+      host: "example.com",
+      method: "GET",
+      path: "/",
+    });
+
+    const response = createMockResponse({
+      id: "1",
+      code: 200,
+      headers: {},
+      body: "test response",
+    });
+
+    const sendHandler: SendHandler = (spec) => {
+      const userAgentHeader = spec.getHeader("User-Agent");
+      const userAgent = userAgentHeader?.[0] ?? "";
+      const isMobile = userAgent.toLowerCase().includes("mobile");
+
+      const mockRequest = createMockRequest({
+        id: "2",
+        host: spec.getHost(),
+        method: spec.getMethod(),
+        path: spec.getPath(),
+      });
+
+      const mockResponse = createMockResponse({
+        id: "2",
+        code: isMobile ? 302 : 200,
+        headers: {},
+        body: "test response",
+      });
+
+      return Promise.resolve({ request: mockRequest, response: mockResponse });
+    };
+
+    const executionHistory = await runCheck(userAgentCheck, [
+      { request, response },
+    ], { sendHandler });
+
+    expect(executionHistory).toMatchObject([
+      {
+        checkId: "user-agent-dependent-response",
+        targetRequestId: "1",
+        steps: [
+          {
+            stepName: "probeUserAgents",
+            stateBefore: {
+              originalStatus: 0,
+              originalLength: 0,
+              probes: [],
+            },
+            stateAfter: {
+              originalStatus: 200,
+              originalLength: 13,
+              probes: [
+                {
+                  userAgent: "desktop",
+                  responseCode: 200,
+                  bodyLength: 13,
+                },
+                {
+                  userAgent: "mobile",
+                  responseCode: 302,
+                  bodyLength: 13,
+                },
+              ],
+            },
+            findings: [],
+            result: "continue",
+            nextStep: "evaluateDifferences",
+          },
+          {
+            stepName: "evaluateDifferences",
+            findings: [
+              {
+                name: "User agent dependent response detected",
+                severity: "info",
+                correlation: {
+                  requestID: "1",
+                },
+              },
+            ],
+            result: "done",
+          },
+        ],
+        status: "completed",
+      },
+    ]);
+  });
+
+  it("should flag when body length difference exceeds tolerance", async () => {
+    const request = createMockRequest({
+      id: "1",
+      host: "example.com",
+      method: "GET",
+      path: "/",
+    });
+
+    const response = createMockResponse({
+      id: "1",
+      code: 200,
+      headers: {},
+      body: "test response",
+    });
+
+    const sendHandler: SendHandler = (spec) => {
+      const userAgentHeader = spec.getHeader("User-Agent");
+      const userAgent = userAgentHeader?.[0] ?? "";
+      const isMobile = userAgent.toLowerCase().includes("mobile");
+
+      const mockRequest = createMockRequest({
+        id: "2",
+        host: spec.getHost(),
+        method: spec.getMethod(),
+        path: spec.getPath(),
+      });
+
+      const body = isMobile
+        ? `test response${"x".repeat(101)}`
+        : "test response";
+
+      const mockResponse = createMockResponse({
+        id: "2",
+        code: 200,
+        headers: {},
+        body,
+      });
+
+      return Promise.resolve({ request: mockRequest, response: mockResponse });
+    };
+
+    const executionHistory = await runCheck(userAgentCheck, [
+      { request, response },
+    ], { sendHandler });
+
+    expect(executionHistory).toMatchObject([
+      {
+        checkId: "user-agent-dependent-response",
+        targetRequestId: "1",
+        steps: [
+          {
+            stepName: "probeUserAgents",
+            result: "continue",
+            nextStep: "evaluateDifferences",
+          },
+          {
+            stepName: "evaluateDifferences",
+            findings: [
+              {
+                name: "User agent dependent response detected",
+                severity: "info",
+                correlation: {
+                  requestID: "1",
+                },
+              },
+            ],
+            result: "done",
+          },
+        ],
+        status: "completed",
+      },
+    ]);
+  });
+
+  it("should not flag when body length difference is within tolerance", async () => {
+    const request = createMockRequest({
+      id: "1",
+      host: "example.com",
+      method: "GET",
+      path: "/",
+    });
+
+    const response = createMockResponse({
+      id: "1",
+      code: 200,
+      headers: {},
+      body: "test response",
+    });
+
+    const sendHandler: SendHandler = (spec) => {
+      const userAgentHeader = spec.getHeader("User-Agent");
+      const userAgent = userAgentHeader?.[0] ?? "";
+      const isMobile = userAgent.toLowerCase().includes("mobile");
+
+      const mockRequest = createMockRequest({
+        id: "2",
+        host: spec.getHost(),
+        method: spec.getMethod(),
+        path: spec.getPath(),
+      });
+
+      const body = isMobile
+        ? `test response${"x".repeat(100)}`
+        : "test response";
+
+      const mockResponse = createMockResponse({
+        id: "2",
+        code: 200,
+        headers: {},
+        body,
+      });
+
+      return Promise.resolve({ request: mockRequest, response: mockResponse });
+    };
+
+    const executionHistory = await runCheck(userAgentCheck, [
+      { request, response },
+    ], { sendHandler });
 
     const findings =
       executionHistory[0]?.steps[executionHistory[0].steps.length - 1]
@@ -79,112 +338,46 @@ describe("User agent dependent response check", () => {
     expect(findings).toHaveLength(0);
   });
 
-  it("flags differing responses", async () => {
+  it("should handle when some probe responses omit the body", async () => {
     const request = createMockRequest({
-      id: "req-2",
+      id: "1",
       host: "example.com",
       method: "GET",
       path: "/",
-      headers: { "User-Agent": ["Original UA"] },
     });
 
     const response = createMockResponse({
-      id: "res-2",
+      id: "1",
       code: 200,
-      headers: { "content-type": ["text/html"] },
-      body: "identical response",
+      headers: {},
+      body: "test response",
     });
 
-    const executionHistory = await runCheck(
-      userAgentCheck,
-      [{ request, response }],
-      { sendHandler: buildSendHandler({ statusDifference: true }) },
-    );
+    const sendHandler: SendHandler = (spec) => {
+      const userAgentHeader = spec.getHeader("User-Agent");
+      const userAgent = userAgentHeader?.[0] ?? "";
+      const isMobile = userAgent.toLowerCase().includes("mobile");
 
-    const findings =
-      executionHistory[0]?.steps[executionHistory[0].steps.length - 1]
-        ?.findings ?? [];
-    expect(findings).toHaveLength(1);
-    expect(findings[0]?.severity).toBe("medium");
-  });
+      const mockRequest = createMockRequest({
+        id: "2",
+        host: spec.getHost(),
+        method: spec.getMethod(),
+        path: spec.getPath(),
+      });
 
-  it("does not flag when body length difference is within tolerance", async () => {
-    const request = createMockRequest({
-      id: "req-3",
-      host: "example.com",
-      method: "GET",
-      path: "/",
-      headers: { "User-Agent": ["Original UA"] },
-    });
+      const mockResponse = createMockResponse({
+        id: "2",
+        code: 200,
+        headers: {},
+        body: isMobile ? undefined : "test response",
+      });
 
-    const response = createMockResponse({
-      id: "res-3",
-      code: 200,
-      headers: { "content-type": ["text/html"] },
-      body: "identical response",
-    });
+      return Promise.resolve({ request: mockRequest, response: mockResponse });
+    };
 
-    const executionHistory = await runCheck(
-      userAgentCheck,
-      [{ request, response }],
-      { sendHandler: buildSendHandler({ bodyDelta: 100 }) },
-    );
-
-    const findings =
-      executionHistory[0]?.steps[executionHistory[0].steps.length - 1]
-        ?.findings ?? [];
-    expect(findings).toHaveLength(0);
-  });
-
-  it("flags when body length difference exceeds tolerance", async () => {
-    const request = createMockRequest({
-      id: "req-4",
-      host: "example.com",
-      method: "GET",
-      path: "/",
-      headers: { "User-Agent": ["Original UA"] },
-    });
-
-    const response = createMockResponse({
-      id: "res-4",
-      code: 200,
-      headers: { "content-type": ["text/html"] },
-      body: "identical response",
-    });
-
-    const executionHistory = await runCheck(
-      userAgentCheck,
-      [{ request, response }],
-      { sendHandler: buildSendHandler({ bodyDelta: 101 }) },
-    );
-
-    const findings =
-      executionHistory[0]?.steps[executionHistory[0].steps.length - 1]
-        ?.findings ?? [];
-    expect(findings).toHaveLength(1);
-  });
-
-  it("handles responses that omit the body", async () => {
-    const request = createMockRequest({
-      id: "req-5",
-      host: "example.com",
-      method: "GET",
-      path: "/",
-      headers: { "User-Agent": ["Original UA"] },
-    });
-
-    const response = createMockResponse({
-      id: "res-5",
-      code: 200,
-      headers: { "content-type": ["text/html"] },
-      body: "identical response",
-    });
-
-    const executionHistory = await runCheck(
-      userAgentCheck,
-      [{ request, response }],
-      { sendHandler: buildSendHandler({ mobileBodyUndefined: true }) },
-    );
+    const executionHistory = await runCheck(userAgentCheck, [
+      { request, response },
+    ], { sendHandler });
 
     const findings =
       executionHistory[0]?.steps[executionHistory[0].steps.length - 1]
