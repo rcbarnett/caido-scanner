@@ -106,7 +106,7 @@ export default defineCheck<State>(({ step }) => {
         {
           name: "User agent dependent response detected",
           description,
-          severity: Severity.MEDIUM,
+          severity: Severity.INFO,
           correlation: {
             requestID: context.target.request.getId(),
             locations: [],
@@ -124,11 +124,16 @@ export default defineCheck<State>(({ step }) => {
         "Detects differences in responses when varying the User-Agent header.",
       type: "active",
       tags: [Tags.INFORMATION_DISCLOSURE, Tags.INPUT_VALIDATION],
-      severities: [Severity.MEDIUM],
-      aggressivity: { minRequests: 0, maxRequests: 4 },
+      severities: [Severity.INFO],
+      aggressivity: {
+        minRequests: USER_AGENTS.length,
+        maxRequests: USER_AGENTS.length,
+      },
     },
     initState: () => ({ originalStatus: 0, originalLength: 0, probes: [] }),
     dedupeKey: keyStrategy().withHost().withPath().build(),
-    when: () => true,
+    when: (target) =>
+      target.request.getMethod().toUpperCase() === "GET" &&
+      target.response !== undefined,
   };
 });
