@@ -1,4 +1,9 @@
-import type { Finding, InterruptReason, ScanRunnable } from "engine";
+import type {
+  Finding,
+  InterruptReason,
+  ScanConfig,
+  ScanRunnable,
+} from "engine";
 import { create } from "mutative";
 import type { CheckExecution, Session } from "shared";
 
@@ -72,13 +77,19 @@ export class ScannerStore {
     return this.runnables.delete(id);
   }
 
-  createSession(title: string): Session {
+  createSession(
+    title: string,
+    requestIDs: string[],
+    scanConfig: ScanConfig,
+  ): Session {
     const id = `ascan-${Math.random().toString(36).substring(2, 15)}`;
     const session: Session = {
       kind: "Pending",
       id,
       createdAt: Date.now(),
       title,
+      requestIDs,
+      scanConfig,
     };
     this.sessions.set(id, session);
     this.saveSession(id, session, true);

@@ -119,7 +119,14 @@ export type SessionProgress = {
 };
 
 export type Session =
-  | { kind: "Pending"; id: string; createdAt: number; title: string }
+  | {
+      kind: "Pending";
+      id: string;
+      createdAt: number;
+      title: string;
+      requestIDs: string[];
+      scanConfig: ScanConfig;
+    }
   | {
       kind: "Running";
       id: string;
@@ -127,6 +134,8 @@ export type Session =
       createdAt: number;
       startedAt: number;
       progress: SessionProgress;
+      requestIDs: string[];
+      scanConfig: ScanConfig;
     }
   | {
       kind: "Done";
@@ -136,6 +145,8 @@ export type Session =
       startedAt: number;
       finishedAt: number;
       progress: SessionProgress;
+      requestIDs: string[];
+      scanConfig: ScanConfig;
     }
   | {
       kind: "Interrupted";
@@ -145,6 +156,8 @@ export type Session =
       startedAt: number;
       progress: SessionProgress;
       reason: InterruptReason;
+      requestIDs: string[];
+      scanConfig: ScanConfig;
     }
   | {
       kind: "Error";
@@ -152,6 +165,8 @@ export type Session =
       title: string;
       createdAt: number;
       error: string;
+      requestIDs: string[];
+      scanConfig: ScanConfig;
     };
 
 export type ScanRequestPayload = {

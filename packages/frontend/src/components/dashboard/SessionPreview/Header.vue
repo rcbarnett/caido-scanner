@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Button from "primevue/button";
+import Dialog from "primevue/dialog";
 import { type Session } from "shared";
 
 import { useForm } from "./useForm";
@@ -8,8 +9,21 @@ const props = defineProps<{
   session: Session;
 }>();
 
-const { getStatusColor, onCancel, onDelete, isCancelling, isDeleting } =
-  useForm(props);
+const {
+  getStatusColor,
+  onCancel,
+  onDelete,
+  onRerun,
+  onConfirmDelete,
+  onCancelDelete,
+  onConfirmRerun,
+  onCancelRerun,
+  isCancelling,
+  isDeleting,
+  isRerunning,
+  showDeleteDialog,
+  showRerunDialog,
+} = useForm(props);
 </script>
 
 <template>
@@ -51,6 +65,20 @@ const { getStatusColor, onCancel, onDelete, isCancelling, isDeleting } =
       />
 
       <Button
+        v-if="
+          session.kind === 'Done' ||
+          session.kind === 'Interrupted' ||
+          session.kind === 'Error'
+        "
+        label="Rerun"
+        :loading="isRerunning"
+        outlined
+        size="small"
+        severity="info"
+        @click="onRerun"
+      />
+
+      <Button
         label="Delete"
         severity="danger"
         :loading="isDeleting"
@@ -60,4 +88,51 @@ const { getStatusColor, onCancel, onDelete, isCancelling, isDeleting } =
       />
     </div>
   </div>
+
+  <Dialog
+    v-model:visible="showDeleteDialog"
+    modal
+    header="Delete Session"
+    :style="{ width: '25rem' }"
+  >
+    <div class="flex flex-col gap-4">
+      <p class="text-surface-300">Do you want to delete this session?</p>
+    </div>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <Button
+          label="Cancel"
+          severity="secondary"
+          outlined
+          @click="onCancelDelete"
+        />
+        <Button label="Delete" @click="onConfirmDelete" />
+      </div>
+    </template>
+  </Dialog>
+
+  <Dialog
+    v-model:visible="showRerunDialog"
+    modal
+    header="Rerun Session"
+    :style="{ width: '25rem' }"
+  >
+    <div class="flex flex-col gap-4">
+      <p class="text-surface-300">
+        This will rerun the session with the same settings as it was originally
+        run with.
+      </p>
+    </div>
+    <template #footer>
+      <div class="flex justify-end gap-2">
+        <Button
+          label="Cancel"
+          severity="secondary"
+          outlined
+          @click="onCancelRerun"
+        />
+        <Button label="Rerun" @click="onConfirmRerun" />
+      </div>
+    </template>
+  </Dialog>
 </template>

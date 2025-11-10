@@ -12,6 +12,7 @@ import {
   deleteScanSession,
   getScanSession,
   getScanSessions,
+  rerunScanSession,
   startActiveScan,
   updateSessionTitle,
 } from "./services/scanner";
@@ -46,6 +47,7 @@ export type API = DefineAPI<{
   deleteScanSession: typeof deleteScanSession;
   getRequestResponse: typeof getRequestResponse;
   updateSessionTitle: typeof updateSessionTitle;
+  rerunScanSession: typeof rerunScanSession;
 }>;
 
 export async function init(sdk: BackendSDK) {
@@ -62,6 +64,7 @@ export async function init(sdk: BackendSDK) {
   sdk.api.register("deleteScanSession", deleteScanSession);
   sdk.api.register("getRequestResponse", getRequestResponse);
   sdk.api.register("updateSessionTitle", updateSessionTitle);
+  sdk.api.register("rerunScanSession", rerunScanSession);
 
   const checksStore = ChecksStore.get();
   checksStore.register(...checks);

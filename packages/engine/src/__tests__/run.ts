@@ -69,7 +69,10 @@ export const runCheck = async (
   const registry = createRegistry();
   registry.register(checkDefinition);
 
-  const runnable = registry.create(testSdk as SDK, fullConfig);
+  const runnable = registry.create(
+    testSdk as unknown as SDK<object, object>,
+    fullConfig,
+  );
 
   const requestIDs = requestResponsePairs.map((pair) => pair.request.getId());
   await runnable.run(requestIDs);

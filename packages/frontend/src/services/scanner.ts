@@ -139,6 +139,19 @@ export const useScannerService = defineStore("services.scanner", () => {
     }
   };
 
+  const rerunScanSession = async (sessionId: string) => {
+    const result = await repository.rerunScanSession(sessionId);
+    switch (result.kind) {
+      case "Success":
+        sdk.window.showToast("Scan restarted", { variant: "success" });
+        selectSession(result.value.id);
+        break;
+      case "Error":
+        sdk.window.showToast(result.error, { variant: "error" });
+    }
+    return result;
+  };
+
   const selectedSession = computed(() => getSelectedSession());
 
   return {
@@ -152,5 +165,6 @@ export const useScannerService = defineStore("services.scanner", () => {
     cancelScanSession,
     deleteScanSession,
     updateSessionTitle,
+    rerunScanSession,
   };
 });
