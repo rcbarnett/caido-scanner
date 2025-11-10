@@ -414,6 +414,20 @@ export class ScannerStore {
   ): void {
     if (this.currentProjectId === undefined) return;
 
+    const isFinishedState =
+      session.kind === "Done" ||
+      session.kind === "Error" ||
+      session.kind === "Interrupted";
+
+    if (!isFinishedState) {
+      const existingTimeout = this.saveTimeouts.get(id);
+      if (existingTimeout !== undefined) {
+        clearTimeout(existingTimeout);
+        this.saveTimeouts.delete(id);
+      }
+      return;
+    }
+
     const existingTimeout = this.saveTimeouts.get(id);
     if (existingTimeout !== undefined) {
       clearTimeout(existingTimeout);
