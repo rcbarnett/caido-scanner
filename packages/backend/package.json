@@ -9,17 +9,17 @@
     "generate:parsers": "bash scripts/generate-parsers.sh"
   },
   "devDependencies": {
-    "@caido/sdk-backend": "^0.48.1",
+    "@caido/sdk-backend": "^0.53.1",
     "shared": "workspace:*",
     "vitest": "^3.2.3"
   },
   "dependencies": {
+    "@lezer/common": "1.3.0",
+    "@lezer/generator": "1.8.0",
+    "@lezer/lr": "1.4.3",
     "engine": "workspace:*",
     "mitt": "^3.0.1",
-    "mutative": "^1.2.0",
-    "zod": "^4.0.5",
-    "@lezer/lr": "1.4.2",
-    "@lezer/generator": "1.8.0",
-    "@lezer/common": "1.2.3"
+    "mutative": "^1.3.0",
+    "zod": "^4.1.12"
   }
 }

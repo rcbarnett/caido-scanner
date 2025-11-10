@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@caido/sdk-backend": "^0.48.1",
-    "vitest": "^2.1.8"
+    "vitest": "^3.2.3"
   },
   "dependencies": {
     "@supercharge/promise-pool": "^3.2.0",

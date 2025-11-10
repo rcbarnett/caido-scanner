@@ -18,6 +18,7 @@ import {
 import { ChecksStore } from "./stores/checks";
 import { ConfigStore } from "./stores/config";
 import { QueueStore } from "./stores/queue";
+import { ScannerStore } from "./stores/scanner";
 import { type BackendSDK } from "./types";
 import { TaskQueue } from "./utils/task-queue";
 import { validateInput } from "./utils/validation";
@@ -47,7 +48,7 @@ export type API = DefineAPI<{
   updateSessionTitle: typeof updateSessionTitle;
 }>;
 
-export function init(sdk: BackendSDK) {
+export async function init(sdk: BackendSDK) {
   sdk.api.register("getChecks", getChecks);
   sdk.api.register("getUserConfig", getUserConfig);
   sdk.api.register("updateUserConfig", updateUserConfig);
@@ -66,7 +67,12 @@ export function init(sdk: BackendSDK) {
   checksStore.register(...checks);
 
   const configStore = ConfigStore.get();
+  const scannerStore = ScannerStore.get();
   const queueStore = QueueStore.get();
+
+  await configStore.initialize(sdk);
+  await scannerStore.initialize(sdk);
+
   const config = configStore.getUserConfig();
   const passiveTaskQueue = new TaskQueue(config.passive.concurrentChecks);
   queueStore.setPassiveTaskQueue(passiveTaskQueue);
@@ -150,6 +156,15 @@ export function init(sdk: BackendSDK) {
         sdk.api.send("passive:queue-finished", passiveTaskID);
       }
     });
+  });
+
+  sdk.events.onProjectChange(async (sdk, project) => {
+    const projectId = project?.getId();
+
+    await configStore.switchProject(projectId);
+    await scannerStore.switchProject(projectId);
+
+    sdk.api.send("project:changed", projectId);
   });
 }
 

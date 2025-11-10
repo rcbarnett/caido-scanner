@@ -26,6 +26,25 @@ export const useConfigService = defineStore("services.config", () => {
         variant: "error",
       });
     }
+
+    sdk.backend.onEvent("project:changed", async () => {
+      store.send({ type: "Start" });
+      const result = await repository.getConfig();
+
+      if (result.kind === "Success") {
+        store.send({ type: "Success", config: result.value });
+      } else {
+        store.send({ type: "Error", error: result.error });
+      }
+    });
+
+    sdk.backend.onEvent("config:updated", async () => {
+      const result = await repository.getConfig();
+
+      if (result.kind === "Success") {
+        store.send({ type: "Success", config: result.value });
+      }
+    });
   };
 
   const updateConfig = async (update: DeepPartial<UserConfig>) => {

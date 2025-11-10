@@ -62,6 +62,17 @@ export const useScannerService = defineStore("services.scanner", () => {
     sdk.backend.onEvent("session:progress", (id, progress) => {
       throttledProgressUpdate(id, progress);
     });
+
+    sdk.backend.onEvent("project:changed", async () => {
+      store.send({ type: "Start" });
+      const result = await repository.getScanSessions();
+
+      if (result.kind === "Success") {
+        store.send({ type: "Success", sessions: result.value });
+      } else {
+        store.send({ type: "Error", error: result.error });
+      }
+    });
   };
 
   const startActiveScan = async (payload: ScanRequestPayload) => {

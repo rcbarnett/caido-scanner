@@ -1,19 +1,59 @@
-import { type Finding, type InterruptReason, type ScanRunnable } from "engine";
+import type { Finding, InterruptReason, ScanRunnable } from "engine";
 import { create } from "mutative";
-import { type CheckExecution, type Session } from "shared";
+import type { CheckExecution, Session } from "shared";
+
+import { SessionsStorage } from "../storage";
+import type { BackendSDK } from "../types";
 
 export class ScannerStore {
-  private static _store?: ScannerStore;
-  private sessions: Map<string, Session> = new Map();
-  private runnables: Map<string, ScanRunnable> = new Map();
+  private static instance?: ScannerStore;
 
-  private constructor() {}
+  private sessions: Map<string, Session>;
+  private runnables: Map<string, ScanRunnable>;
+  private sessionsStorage!: SessionsStorage;
+  private currentProjectId?: string;
+  private saveTimeouts: Map<string, Timeout>;
+
+  private constructor() {
+    this.sessions = new Map();
+    this.runnables = new Map();
+    this.saveTimeouts = new Map();
+  }
 
   static get(): ScannerStore {
-    if (!ScannerStore._store) {
-      ScannerStore._store = new ScannerStore();
+    if (!ScannerStore.instance) {
+      ScannerStore.instance = new ScannerStore();
     }
-    return ScannerStore._store;
+    return ScannerStore.instance;
+  }
+
+  async initialize(sdk: BackendSDK): Promise<void> {
+    this.sessionsStorage = new SessionsStorage(sdk);
+
+    const project = await sdk.projects.getCurrent();
+    this.currentProjectId = project?.getId();
+
+    if (this.currentProjectId !== undefined) {
+      await this.loadSessions(this.currentProjectId);
+    }
+  }
+
+  async switchProject(projectId: string | undefined): Promise<void> {
+    this.currentProjectId = projectId;
+    this.sessions.clear();
+    this.runnables.clear();
+    this.saveTimeouts.clear();
+
+    if (projectId !== undefined) {
+      await this.loadSessions(projectId);
+    }
+  }
+
+  private async loadSessions(projectId: string): Promise<void> {
+    const sessions = await this.sessionsStorage.list(projectId);
+    for (const session of sessions) {
+      this.sessions.set(session.id, session);
+    }
   }
 
   registerRunnable(id: string, runnable: ScanRunnable) {
@@ -33,7 +73,7 @@ export class ScannerStore {
   }
 
   createSession(title: string): Session {
-    const id = "ascan-" + Math.random().toString(36).substring(2, 15);
+    const id = `ascan-${Math.random().toString(36).substring(2, 15)}`;
     const session: Session = {
       kind: "Pending",
       id,
@@ -41,6 +81,7 @@ export class ScannerStore {
       title,
     };
     this.sessions.set(id, session);
+    this.saveSession(id, session, true);
     return session;
   }
 
@@ -53,6 +94,16 @@ export class ScannerStore {
     if (runnable) {
       runnable.cancel("Cancelled");
       this.runnables.delete(id);
+    }
+
+    const timeout = this.saveTimeouts.get(id);
+    if (timeout !== undefined) {
+      clearTimeout(timeout);
+      this.saveTimeouts.delete(id);
+    }
+
+    if (this.currentProjectId !== undefined) {
+      this.sessionsStorage.delete(this.currentProjectId, id);
     }
 
     return this.sessions.delete(id);
@@ -211,7 +262,7 @@ export class ScannerStore {
 
       const newExecution: CheckExecution = {
         kind: "Running",
-        id: "check-" + Math.random().toString(36).substring(2, 15),
+        id: `check-${Math.random().toString(36).substring(2, 15)}`,
         checkID: checkId,
         targetRequestID: targetId,
         startedAt: Date.now(),
@@ -334,7 +385,41 @@ export class ScannerStore {
 
     const newSession = create(session, updater);
     this.sessions.set(id, newSession);
+
+    const shouldSaveImmediately =
+      newSession.kind === "Done" ||
+      newSession.kind === "Error" ||
+      newSession.kind === "Interrupted";
+
+    this.saveSession(id, newSession, shouldSaveImmediately);
+
     return newSession;
+  }
+
+  private saveSession(
+    id: string,
+    session: Session,
+    immediate: boolean = false,
+  ): void {
+    if (this.currentProjectId === undefined) return;
+
+    const existingTimeout = this.saveTimeouts.get(id);
+    if (existingTimeout !== undefined) {
+      clearTimeout(existingTimeout);
+    }
+
+    if (immediate) {
+      this.sessionsStorage.save(this.currentProjectId, session);
+      this.saveTimeouts.delete(id);
+    } else {
+      const timeout = setTimeout(() => {
+        if (this.currentProjectId !== undefined) {
+          this.sessionsStorage.save(this.currentProjectId, session);
+        }
+        this.saveTimeouts.delete(id);
+      }, 2000);
+      this.saveTimeouts.set(id, timeout);
+    }
   }
 
   private findCheckExecution(

@@ -131,8 +131,10 @@ const processSuccess = (
     case "Clear":
       return { type: "Idle" };
     case "Start":
-    case "Error":
+      return { type: "Loading" };
     case "Success":
+      return { type: "Success", sessions: message.sessions };
+    case "Error":
     case "CancelSession":
       return state;
   }

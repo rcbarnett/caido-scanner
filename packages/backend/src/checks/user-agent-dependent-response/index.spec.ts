@@ -42,9 +42,11 @@ describe("user-agent-dependent-response check", () => {
       return Promise.resolve({ request: mockRequest, response: mockResponse });
     };
 
-    const executionHistory = await runCheck(userAgentCheck, [
-      { request, response },
-    ], { sendHandler });
+    const executionHistory = await runCheck(
+      userAgentCheck,
+      [{ request, response }],
+      { sendHandler },
+    );
 
     expect(executionHistory).toEqual([
       {
@@ -158,9 +160,11 @@ describe("user-agent-dependent-response check", () => {
       return Promise.resolve({ request: mockRequest, response: mockResponse });
     };
 
-    const executionHistory = await runCheck(userAgentCheck, [
-      { request, response },
-    ], { sendHandler });
+    const executionHistory = await runCheck(
+      userAgentCheck,
+      [{ request, response }],
+      { sendHandler },
+    );
 
     expect(executionHistory).toMatchObject([
       {
@@ -254,9 +258,11 @@ describe("user-agent-dependent-response check", () => {
       return Promise.resolve({ request: mockRequest, response: mockResponse });
     };
 
-    const executionHistory = await runCheck(userAgentCheck, [
-      { request, response },
-    ], { sendHandler });
+    const executionHistory = await runCheck(
+      userAgentCheck,
+      [{ request, response }],
+      { sendHandler },
+    );
 
     expect(executionHistory).toMatchObject([
       {
@@ -328,9 +334,11 @@ describe("user-agent-dependent-response check", () => {
       return Promise.resolve({ request: mockRequest, response: mockResponse });
     };
 
-    const executionHistory = await runCheck(userAgentCheck, [
-      { request, response },
-    ], { sendHandler });
+    const executionHistory = await runCheck(
+      userAgentCheck,
+      [{ request, response }],
+      { sendHandler },
+    );
 
     const findings =
       executionHistory[0]?.steps[executionHistory[0].steps.length - 1]
@@ -375,9 +383,11 @@ describe("user-agent-dependent-response check", () => {
       return Promise.resolve({ request: mockRequest, response: mockResponse });
     };
 
-    const executionHistory = await runCheck(userAgentCheck, [
-      { request, response },
-    ], { sendHandler });
+    const executionHistory = await runCheck(
+      userAgentCheck,
+      [{ request, response }],
+      { sendHandler },
+    );
 
     const findings =
       executionHistory[0]?.steps[executionHistory[0].steps.length - 1]
