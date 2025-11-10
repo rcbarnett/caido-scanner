@@ -1,4 +1,5 @@
 import { type ScanAggressivity, type Severity } from "engine";
+import type { Preset } from "shared";
 import { computed, type Ref } from "vue";
 
 import { useConfigService } from "@/services/config";
@@ -61,6 +62,24 @@ export const useForm = (state: Ref<ConfigState & { type: "Success" }>) => {
     },
   });
 
+  const defaultPresetName = computed({
+    get: () => state.value.config.defaultPresetName,
+    set: async (value: string | undefined) => {
+      await configService.updateConfig({
+        defaultPresetName: value,
+      });
+    },
+  });
+
+  const presets = computed(() => state.value.config.presets);
+
+  const presetOptions = computed(() => {
+    return presets.value.map((preset: Preset) => ({
+      label: preset.name,
+      value: preset.name,
+    }));
+  });
+
   return {
     passiveEnabled,
     passiveAggressivity,
@@ -68,5 +87,7 @@ export const useForm = (state: Ref<ConfigState & { type: "Success" }>) => {
     passiveConcurrentScans,
     passiveConcurrentRequests,
     passiveSeverities,
+    defaultPresetName,
+    presetOptions,
   };
 };

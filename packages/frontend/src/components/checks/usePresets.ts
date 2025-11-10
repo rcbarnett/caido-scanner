@@ -18,14 +18,41 @@ export const useCheckPresets = () => {
     const { config } = configState;
     const updatedPresets = config.presets.filter((p) => p.name !== name);
 
-    const update = {
+    const update: {
+      presets: Preset[];
+      defaultPresetName?: string;
+    } = {
       presets: updatedPresets,
     };
+
+    if (config.defaultPresetName === name) {
+      const firstPreset = updatedPresets[0];
+      update.defaultPresetName =
+        firstPreset !== undefined ? firstPreset.name : undefined;
+    }
 
     await configService.updateConfig(update);
   };
 
+  const setAsDefault = async (name: string) => {
+    const configState = configService.getState();
+    if (configState.type !== "Success") return;
+
+    await configService.updateConfig({
+      defaultPresetName: name,
+    });
+  };
+
   const menuModel = ref([
+    {
+      label: "Set as Default",
+      icon: "fas fa-star",
+      command: () => {
+        if (selectedPreset.value) {
+          setAsDefault(selectedPreset.value.name);
+        }
+      },
+    },
     {
       label: "Delete",
       icon: "fas fa-trash",
@@ -89,6 +116,14 @@ export const useCheckPresets = () => {
 
   const presets = computed(() => getPresets());
 
+  const getDefaultPresetName = () => {
+    const configState = configService.getState();
+    if (configState.type !== "Success") return undefined;
+    return configState.config.defaultPresetName;
+  };
+
+  const defaultPresetName = computed(() => getDefaultPresetName());
+
   const applyPreset = async (preset: Preset) => {
     const configState = configService.getState();
     if (configState.type !== "Success") return;
@@ -111,6 +146,7 @@ export const useCheckPresets = () => {
     menu,
     menuModel,
     presets,
+    defaultPresetName,
     handleNewPreset,
     handleSaveNewPreset,
     handleCancelNewPreset,

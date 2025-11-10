@@ -5,10 +5,16 @@ import {
   PresetsStorage,
   type ProjectConfig,
   ProjectConfigStorage,
+  SettingsStorage,
 } from "../storage";
 import type { BackendSDK } from "../types";
 
-import { BALANCED_PRESET, HEAVY_PRESET, LIGHT_PRESET } from "./presets";
+import {
+  BALANCED_PRESET,
+  HEAVY_PRESET,
+  LIGHT_PRESET,
+  BUGBOUNTY_PRESET,
+} from "./presets";
 
 const createDefaultPassiveConfig = (): PassiveConfig => ({
   enabled: true,
@@ -28,6 +34,7 @@ const createDefaultPresets = (): Preset[] => [
   LIGHT_PRESET,
   BALANCED_PRESET,
   HEAVY_PRESET,
+  BUGBOUNTY_PRESET,
 ];
 
 export class ConfigStore {
@@ -37,6 +44,7 @@ export class ConfigStore {
   private sdk!: BackendSDK;
   private presetsStorage!: PresetsStorage;
   private projectConfigStorage!: ProjectConfigStorage;
+  private settingsStorage!: SettingsStorage;
   private currentProjectId?: string;
   private saveTimeout?: Timeout;
 
@@ -68,6 +76,7 @@ export class ConfigStore {
     this.sdk = sdk;
     this.presetsStorage = new PresetsStorage(sdk);
     this.projectConfigStorage = new ProjectConfigStorage(sdk);
+    this.settingsStorage = new SettingsStorage(sdk);
 
     const project = await sdk.projects.getCurrent();
     this.currentProjectId = project?.getId();
@@ -77,6 +86,11 @@ export class ConfigStore {
       this.config.presets = savedPresets;
     } else {
       await this.presetsStorage.save(this.config.presets);
+    }
+
+    const savedSettings = await this.settingsStorage.load();
+    if (savedSettings !== undefined) {
+      this.config.defaultPresetName = savedSettings.defaultPresetName;
     }
 
     if (this.currentProjectId !== undefined) {
@@ -103,12 +117,29 @@ export class ConfigStore {
       return;
     }
 
-    const lightPreset = this.config.presets[0];
-    if (lightPreset) {
-      this.config.active.overrides = lightPreset.active;
-      this.config.passive.overrides = lightPreset.passive;
+    const defaultPreset = this.getDefaultPreset();
+    if (defaultPreset) {
+      this.config.active.overrides = defaultPreset.active;
+      this.config.passive.overrides = defaultPreset.passive;
     }
     this.saveProjectConfig();
+  }
+
+  private getDefaultPreset(): Preset | undefined {
+    if (this.config.presets.length === 0) {
+      return undefined;
+    }
+
+    if (this.config.defaultPresetName !== undefined) {
+      const preset = this.config.presets.find(
+        (p) => p.name === this.config.defaultPresetName
+      );
+      if (preset !== undefined) {
+        return preset;
+      }
+    }
+
+    return this.config.presets[0];
   }
 
   private saveProjectConfig(): void {
@@ -139,6 +170,26 @@ export class ConfigStore {
 
     if (config.presets !== undefined) {
       this.presetsStorage.save(config.presets);
+
+      if (
+        this.config.defaultPresetName !== undefined &&
+        !this.config.presets.some(
+          (p) => p.name === this.config.defaultPresetName
+        )
+      ) {
+        const firstPreset = this.config.presets[0];
+        this.config.defaultPresetName =
+          firstPreset !== undefined ? firstPreset.name : undefined;
+        this.settingsStorage.save({
+          defaultPresetName: this.config.defaultPresetName,
+        });
+      }
+    }
+
+    if (config.defaultPresetName !== undefined) {
+      this.settingsStorage.save({
+        defaultPresetName: config.defaultPresetName,
+      });
     }
 
     this.saveProjectConfig();

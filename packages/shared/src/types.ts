@@ -45,6 +45,7 @@ export type UserConfig = {
   passive: PassiveConfig;
   active: ActiveConfig;
   presets: Preset[];
+  defaultPresetName?: string;
 };
 
 export type SelectOptions = {

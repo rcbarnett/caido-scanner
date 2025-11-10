@@ -159,13 +159,14 @@ const {
                 <Button
                   v-for="preset in presets"
                   :key="preset.name"
-                  :label="preset.name"
                   size="small"
                   severity="info"
                   outlined
                   @click="applyPreset(preset)"
                   @contextmenu="onPresetContextMenu($event, preset)"
-                />
+                >
+                  {{ preset.name }}
+                </Button>
                 <Button
                   label="New Preset"
                   size="small"
