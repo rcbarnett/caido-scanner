@@ -162,7 +162,7 @@ const {
                   size="small"
                   severity="info"
                   outlined
-                  @click="applyPreset(preset)"
+                  @mousedown="applyPreset(preset)"
                   @contextmenu="onPresetContextMenu($event, preset)"
                 >
                   {{ preset.name }}
@@ -174,7 +174,7 @@ const {
                   outlined
                   icon="fas fa-plus"
                   class="text-xs"
-                  @click="handleNewPreset"
+                  @mousedown="handleNewPreset"
                 />
               </div>
             </div>
@@ -214,12 +214,12 @@ const {
           label="Cancel"
           severity="secondary"
           outlined
-          @click="handleCancelNewPreset"
+          @mousedown="handleCancelNewPreset"
         />
         <Button
           label="Save"
           :disabled="!newPresetName.trim()"
-          @click="handleSaveNewPreset"
+          @mousedown="handleSaveNewPreset"
         />
       </div>
     </template>

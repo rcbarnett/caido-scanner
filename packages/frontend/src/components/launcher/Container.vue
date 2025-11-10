@@ -56,7 +56,7 @@ const launcher = useLauncher();
         icon="fas fa-chevron-left"
         severity="info"
         outlined
-        @click="goPrevious"
+        @mousedown="goPrevious"
       />
       <Button
         v-if="!isLastStep"
@@ -65,7 +65,7 @@ const launcher = useLauncher();
         icon-pos="right"
         severity="info"
         outlined
-        @click="goNext"
+        @mousedown="goNext"
       />
       <Button
         label="Run Scan"
@@ -73,7 +73,7 @@ const launcher = useLauncher();
         severity="success"
         :disabled="launcher.isLoading"
         :loading="launcher.isLoading"
-        @click="launcher.onSubmit(props.sdk, props.incrementCount)"
+        @mousedown="launcher.onSubmit(props.sdk, props.incrementCount)"
       />
     </div>
   </div>
