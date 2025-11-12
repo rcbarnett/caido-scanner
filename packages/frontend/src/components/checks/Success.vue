@@ -159,7 +159,7 @@ const {
                 <Button
                   v-for="preset in presets"
                   :key="preset.name"
-                  label="preset.name"
+                  :label="preset.name"
                   size="small"
                   severity="info"
                   outlined
