@@ -264,7 +264,7 @@ step("testOpenRedirect", async (state, context) => {
 
 ### Add to Presets
 
-- Update `/Users/bebiks/Documents/GitHub/scannerv2/packages/backend/src/stores/presets/*.ts` to include the check in default presets.
+- Update `packages/backend/src/stores/presets/*.ts` to include the check in default presets.
 
 Light Preset:
 
