@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ScanAggressivity, Severity } from "engine";
 import Card from "primevue/card";
+import Dropdown from "primevue/dropdown";
 import InputNumber from "primevue/inputnumber";
 import SelectButton from "primevue/selectbutton";
 import ToggleSwitch from "primevue/toggleswitch";
@@ -23,6 +24,8 @@ const {
   passiveSeverities,
   passiveConcurrentScans,
   passiveConcurrentRequests,
+  defaultPresetName,
+  presetOptions,
 } = useForm(state);
 
 const severityOptions = computed(() =>
@@ -70,6 +73,29 @@ const aggressivityOptions = computed(() =>
     >
       <template #content>
         <div class="flex flex-col gap-6 p-4">
+          <div class="flex flex-col gap-4">
+            <h4 class="text-md font-medium text-surface-300">General</h4>
+
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex flex-col gap-1 flex-1">
+                <label class="text-sm font-medium">Default Preset</label>
+                <p class="text-xs text-surface-400">
+                  The preset that will be applied to new projects
+                </p>
+              </div>
+              <div class="flex-shrink-0">
+                <Dropdown
+                  v-model="defaultPresetName"
+                  :options="presetOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="Select a preset"
+                  class="w-48"
+                />
+              </div>
+            </div>
+          </div>
+
           <div class="flex flex-col gap-4">
             <h4 class="text-md font-medium text-surface-300">
               Passive Scanner

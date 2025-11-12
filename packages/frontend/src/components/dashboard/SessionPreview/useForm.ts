@@ -9,9 +9,13 @@ export const useForm = (props: { session: Session }) => {
   const { session } = toRefs(props);
   const now = useTimestamp({ interval: 50 });
 
-  const { cancelScanSession, deleteScanSession } = useScannerService();
+  const { cancelScanSession, deleteScanSession, rerunScanSession } =
+    useScannerService();
   const isDeleting = ref(false);
   const isCancelling = ref(false);
+  const isRerunning = ref(false);
+  const showDeleteDialog = ref(false);
+  const showRerunDialog = ref(false);
 
   const getStatusColor = (kind: string) => {
     switch (kind) {
@@ -138,9 +142,33 @@ export const useForm = (props: { session: Session }) => {
   };
 
   const onDelete = () => {
+    showDeleteDialog.value = true;
+  };
+
+  const onConfirmDelete = () => {
     isDeleting.value = true;
     deleteScanSession(session.value.id);
     isDeleting.value = false;
+    showDeleteDialog.value = false;
+  };
+
+  const onCancelDelete = () => {
+    showDeleteDialog.value = false;
+  };
+
+  const onRerun = () => {
+    showRerunDialog.value = true;
+  };
+
+  const onConfirmRerun = async () => {
+    isRerunning.value = true;
+    await rerunScanSession(session.value.id);
+    isRerunning.value = false;
+    showRerunDialog.value = false;
+  };
+
+  const onCancelRerun = () => {
+    showRerunDialog.value = false;
   };
 
   const findings = computed(() => {
@@ -171,8 +199,16 @@ export const useForm = (props: { session: Session }) => {
     timeSinceFinished,
     onCancel,
     onDelete,
+    onRerun,
+    onConfirmDelete,
+    onCancelDelete,
+    onConfirmRerun,
+    onCancelRerun,
     isDeleting,
     isCancelling,
+    isRerunning,
+    showDeleteDialog,
+    showRerunDialog,
     findings,
   };
 };

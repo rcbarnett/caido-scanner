@@ -100,6 +100,7 @@ const handleLabel = (
           size="small"
           :text="!item.isActive?.()"
           :label="handleLabel(item.label)"
+          @mousedown="item.command?.()"
         />
       </template>
     </MenuBar>

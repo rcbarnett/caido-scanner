@@ -1,9 +1,17 @@
-import { error, ok, type Result, type Session } from "shared";
+import {
+  error,
+  ok,
+  type Result,
+  type ScanRequestPayload,
+  type Session,
+} from "shared";
 
 import { IdSchema, SessionTitleSchema } from "../../schemas";
 import { ScannerStore } from "../../stores/scanner";
 import { type BackendSDK } from "../../types";
 import { validateInput } from "../../utils/validation";
+
+import { startActiveScan } from "./execution";
 
 export const getScanSession = (_: BackendSDK, id: string): Result<Session> => {
   const validation = validateInput(IdSchema, id);
@@ -76,4 +84,27 @@ export const updateSessionTitle = (
 
   sdk.api.send("session:updated", idValidation.value, result);
   return ok(result);
+};
+
+export const rerunScanSession = (
+  sdk: BackendSDK,
+  id: string,
+): Result<Session> => {
+  const validation = validateInput(IdSchema, id);
+  if (validation.kind === "Error") {
+    return validation;
+  }
+
+  const session = ScannerStore.get().getSession(validation.value);
+  if (!session) {
+    return error(`Session ${validation.value} not found`);
+  }
+
+  const payload: ScanRequestPayload = {
+    requestIDs: session.requestIDs,
+    scanConfig: session.scanConfig,
+    title: `${session.title} (Rerun)`,
+  };
+
+  return startActiveScan(sdk, payload);
 };

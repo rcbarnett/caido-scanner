@@ -1,394 +1,63 @@
 import { ScanAggressivity } from "engine";
-import { type UserConfig } from "shared";
+import type { ActiveConfig, PassiveConfig, Preset, UserConfig } from "shared";
 
-import { Checks } from "../checks";
+import {
+  PresetsStorage,
+  type ProjectConfig,
+  ProjectConfigStorage,
+  SettingsStorage,
+} from "../storage";
+import type { BackendSDK } from "../types";
+
+import {
+  BALANCED_PRESET,
+  BUGBOUNTY_PRESET,
+  HEAVY_PRESET,
+  LIGHT_PRESET,
+} from "./presets";
+
+const createDefaultPassiveConfig = (): PassiveConfig => ({
+  enabled: true,
+  aggressivity: ScanAggressivity.LOW,
+  inScopeOnly: true,
+  concurrentChecks: 2,
+  concurrentRequests: 3,
+  overrides: [],
+  severities: ["critical", "high", "medium", "low", "info"],
+});
+
+const createDefaultActiveConfig = (): ActiveConfig => ({
+  overrides: [],
+});
+
+const createDefaultPresets = (): Preset[] => [
+  LIGHT_PRESET,
+  BALANCED_PRESET,
+  HEAVY_PRESET,
+  BUGBOUNTY_PRESET,
+];
 
 export class ConfigStore {
-  private static _store?: ConfigStore;
+  private static instance?: ConfigStore;
 
   private config: UserConfig;
+  private sdk!: BackendSDK;
+  private presetsStorage!: PresetsStorage;
+  private projectConfigStorage!: ProjectConfigStorage;
+  private settingsStorage!: SettingsStorage;
+  private currentProjectId?: string;
+  private saveTimeout?: Timeout;
 
   private constructor() {
+    const presets = createDefaultPresets();
+    const lightPreset = presets[0];
+
     this.config = {
-      passive: {
-        enabled: true,
-        aggressivity: ScanAggressivity.LOW,
-        inScopeOnly: true,
-        concurrentChecks: 2,
-        concurrentRequests: 3,
-        overrides: [],
-        severities: ["critical", "high", "medium", "low", "info"],
-      },
-      active: {
-        overrides: [],
-      },
-      presets: [
-        {
-          name: "Light",
-          active: [
-            {
-              checkID: Checks.EXPOSED_ENV,
-              enabled: true,
-            },
-            {
-              checkID: Checks.DIRECTORY_LISTING,
-              enabled: true,
-            },
-            {
-              checkID: Checks.JSON_HTML_RESPONSE,
-              enabled: true,
-            },
-            {
-              checkID: Checks.OPEN_REDIRECT,
-              enabled: true,
-            },
-            {
-              checkID: Checks.ANTI_CLICKJACKING,
-              enabled: true,
-            },
-            {
-              checkID: Checks.ROBOTS_TXT,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CORS_MISCONFIG,
-              enabled: true,
-            },
-            {
-              checkID: Checks.PHPINFO,
-              enabled: false,
-            },
-            {
-              checkID: Checks.GIT_CONFIG,
-              enabled: true,
-            },
-            {
-              checkID: Checks.BASIC_REFLECTED_XSS,
-              enabled: false,
-            },
-            {
-              checkID: Checks.MYSQL_ERROR_BASED_SQLI,
-              enabled: false,
-            },
-            {
-              checkID: Checks.COMMAND_INJECTION,
-              enabled: false,
-            },
-            {
-              checkID: Checks.PATH_TRAVERSAL,
-              enabled: false,
-            },
-            {
-              checkID: Checks.SSTI,
-              enabled: false,
-            },
-            {
-              checkID: Checks.SUSPECT_TRANSFORM,
-              enabled: false,
-            },
-          ],
-          passive: [
-            {
-              checkID: Checks.BIG_REDIRECTS,
-              enabled: true,
-            },
-            {
-              checkID: Checks.EXPOSED_ENV,
-              enabled: false,
-            },
-            {
-              checkID: Checks.JSON_HTML_RESPONSE,
-              enabled: true,
-            },
-            {
-              checkID: Checks.OPEN_REDIRECT,
-              enabled: false,
-            },
-            {
-              checkID: Checks.ANTI_CLICKJACKING,
-              enabled: false,
-            },
-            // {
-            //   checkID: Checks.COOKIE_HTTPONLY,
-            //   enabled: true,
-            // },
-            // {
-            //   checkID: Checks.COOKIE_SECURE,
-            //   enabled: true,
-            // },
-            {
-              checkID: Checks.SQL_STATEMENT_IN_PARAMS,
-              enabled: false,
-            },
-            {
-              checkID: Checks.APPLICATION_ERRORS,
-              enabled: false,
-            },
-            {
-              checkID: Checks.DEBUG_ERRORS,
-              enabled: false,
-            },
-            {
-              checkID: Checks.CREDIT_CARD_DISCLOSURE,
-              enabled: false,
-            },
-            {
-              checkID: Checks.DB_CONNECTION_DISCLOSURE,
-              enabled: false,
-            },
-            {
-              checkID: Checks.EMAIL_DISCLOSURE,
-              enabled: false,
-            },
-            {
-              checkID: Checks.HASH_DISCLOSURE,
-              enabled: false,
-            },
-            {
-              checkID: Checks.PRIVATE_IP_DISCLOSURE,
-              enabled: false,
-            },
-            {
-              checkID: Checks.PRIVATE_KEY_DISCLOSURE,
-              enabled: false,
-            },
-            {
-              checkID: Checks.SSN_DISCLOSURE,
-              enabled: false,
-            },
-            {
-              checkID: Checks.CSP_NOT_ENFORCED,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_MALFORMED_SYNTAX,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_UNTRUSTED_STYLE,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_UNTRUSTED_SCRIPT,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_FORM_HIJACKING,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_CLICKJACKING,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_ALLOWLISTED_SCRIPTS,
-              enabled: true,
-            },
-            {
-              checkID: Checks.MISSING_CONTENT_TYPE,
-              enabled: true,
-            },
-          ],
-        },
-        {
-          name: "Balanced",
-          active: [
-            {
-              checkID: Checks.EXPOSED_ENV,
-              enabled: true,
-            },
-            {
-              checkID: Checks.DIRECTORY_LISTING,
-              enabled: true,
-            },
-            {
-              checkID: Checks.JSON_HTML_RESPONSE,
-              enabled: true,
-            },
-            {
-              checkID: Checks.OPEN_REDIRECT,
-              enabled: true,
-            },
-            {
-              checkID: Checks.BASIC_REFLECTED_XSS,
-              enabled: true,
-            },
-            {
-              checkID: Checks.PHPINFO,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CORS_MISCONFIG,
-              enabled: true,
-            },
-            {
-              checkID: Checks.MYSQL_ERROR_BASED_SQLI,
-              enabled: true,
-            },
-            {
-              checkID: Checks.COMMAND_INJECTION,
-              enabled: true,
-            },
-            {
-              checkID: Checks.SSTI,
-              enabled: true,
-            },
-            {
-              checkID: Checks.ROBOTS_TXT,
-              enabled: true,
-            },
-            {
-              checkID: Checks.GIT_CONFIG,
-              enabled: true,
-            },
-            {
-              checkID: Checks.PATH_TRAVERSAL,
-              enabled: true,
-            },
-            {
-              checkID: Checks.ANTI_CLICKJACKING,
-              enabled: true,
-            },
-            {
-              checkID: Checks.SUSPECT_TRANSFORM,
-              enabled: true,
-            },
-          ],
-          passive: [
-            {
-              checkID: Checks.BIG_REDIRECTS,
-              enabled: true,
-            },
-            {
-              checkID: Checks.EXPOSED_ENV,
-              enabled: true,
-            },
-            {
-              checkID: Checks.JSON_HTML_RESPONSE,
-              enabled: true,
-            },
-            {
-              checkID: Checks.OPEN_REDIRECT,
-              enabled: true,
-            },
-            {
-              checkID: Checks.MYSQL_ERROR_BASED_SQLI,
-              enabled: false,
-            },
-            {
-              checkID: Checks.BASIC_REFLECTED_XSS,
-              enabled: true,
-            },
-            {
-              checkID: Checks.PHPINFO,
-              enabled: true,
-            },
-            {
-              checkID: Checks.SSTI,
-              enabled: false,
-            },
-            {
-              checkID: Checks.ANTI_CLICKJACKING,
-              enabled: true,
-            },
-            // {
-            //   checkID: Checks.COOKIE_HTTPONLY,
-            //   enabled: true,
-            // },
-            // {
-            //   checkID: Checks.COOKIE_SECURE,
-            //   enabled: true,
-            // },
-            {
-              checkID: Checks.SQL_STATEMENT_IN_PARAMS,
-              enabled: true,
-            },
-            {
-              checkID: Checks.APPLICATION_ERRORS,
-              enabled: true,
-            },
-            {
-              checkID: Checks.DEBUG_ERRORS,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CREDIT_CARD_DISCLOSURE,
-              enabled: true,
-            },
-            {
-              checkID: Checks.DB_CONNECTION_DISCLOSURE,
-              enabled: false,
-            },
-            {
-              checkID: Checks.EMAIL_DISCLOSURE,
-              enabled: false,
-            },
-            {
-              checkID: Checks.HASH_DISCLOSURE,
-              enabled: false,
-            },
-            {
-              checkID: Checks.PRIVATE_IP_DISCLOSURE,
-              enabled: true,
-            },
-            {
-              checkID: Checks.PRIVATE_KEY_DISCLOSURE,
-              enabled: true,
-            },
-            {
-              checkID: Checks.SSN_DISCLOSURE,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_NOT_ENFORCED,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_MALFORMED_SYNTAX,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_UNTRUSTED_STYLE,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_UNTRUSTED_SCRIPT,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_FORM_HIJACKING,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_CLICKJACKING,
-              enabled: true,
-            },
-            {
-              checkID: Checks.CSP_ALLOWLISTED_SCRIPTS,
-              enabled: true,
-            },
-            {
-              checkID: Checks.MISSING_CONTENT_TYPE,
-              enabled: true,
-            },
-          ],
-        },
-        {
-          name: "Heavy",
-          active: Object.values(Checks).map((checkID) => ({
-            checkID,
-            enabled: true,
-          })),
-          passive: Object.values(Checks).map((checkID) => ({
-            checkID,
-            enabled: true,
-          })),
-        },
-      ],
+      passive: createDefaultPassiveConfig(),
+      active: createDefaultActiveConfig(),
+      presets,
     };
 
-    // Light preset is selected by default
-    const lightPreset = this.config.presets[0];
     if (lightPreset) {
       this.config.active.overrides = lightPreset.active;
       this.config.passive.overrides = lightPreset.passive;
@@ -396,19 +65,136 @@ export class ConfigStore {
   }
 
   static get(): ConfigStore {
-    if (!ConfigStore._store) {
-      ConfigStore._store = new ConfigStore();
+    if (!ConfigStore.instance) {
+      ConfigStore.instance = new ConfigStore();
     }
 
-    return ConfigStore._store;
+    return ConfigStore.instance;
   }
 
-  getUserConfig() {
+  async initialize(sdk: BackendSDK): Promise<void> {
+    this.sdk = sdk;
+    this.presetsStorage = new PresetsStorage(sdk);
+    this.projectConfigStorage = new ProjectConfigStorage(sdk);
+    this.settingsStorage = new SettingsStorage(sdk);
+
+    const project = await sdk.projects.getCurrent();
+    this.currentProjectId = project?.getId();
+
+    const savedPresets = await this.presetsStorage.load();
+    if (savedPresets) {
+      this.config.presets = savedPresets;
+    } else {
+      await this.presetsStorage.save(this.config.presets);
+    }
+
+    const savedSettings = await this.settingsStorage.load();
+    if (savedSettings !== undefined) {
+      this.config.defaultPresetName = savedSettings.defaultPresetName;
+    }
+
+    if (this.currentProjectId !== undefined) {
+      await this.loadProjectConfig(this.currentProjectId);
+    }
+  }
+
+  async switchProject(projectId: string | undefined): Promise<void> {
+    this.currentProjectId = projectId;
+
+    if (projectId !== undefined) {
+      await this.loadProjectConfig(projectId);
+    } else {
+      this.config.passive = createDefaultPassiveConfig();
+      this.config.active = createDefaultActiveConfig();
+    }
+  }
+
+  private async loadProjectConfig(projectId: string): Promise<void> {
+    const savedConfig = await this.projectConfigStorage.load(projectId);
+    if (savedConfig !== undefined) {
+      this.config.passive = savedConfig.passive;
+      this.config.active = savedConfig.active;
+      return;
+    }
+
+    const defaultPreset = this.getDefaultPreset();
+    if (defaultPreset) {
+      this.config.active.overrides = defaultPreset.active;
+      this.config.passive.overrides = defaultPreset.passive;
+    }
+    this.saveProjectConfig();
+  }
+
+  private getDefaultPreset(): Preset | undefined {
+    if (this.config.presets.length === 0) {
+      return undefined;
+    }
+
+    if (this.config.defaultPresetName !== undefined) {
+      const preset = this.config.presets.find(
+        (p) => p.name === this.config.defaultPresetName,
+      );
+      if (preset !== undefined) {
+        return preset;
+      }
+    }
+
+    return this.config.presets[0];
+  }
+
+  private saveProjectConfig(): void {
+    if (this.currentProjectId === undefined) return;
+
+    if (this.saveTimeout !== undefined) {
+      clearTimeout(this.saveTimeout);
+    }
+
+    this.saveTimeout = setTimeout(() => {
+      if (this.currentProjectId === undefined) return;
+
+      const projectConfig: ProjectConfig = {
+        passive: this.config.passive,
+        active: this.config.active,
+      };
+
+      this.projectConfigStorage.save(this.currentProjectId, projectConfig);
+    }, 1000);
+  }
+
+  getUserConfig(): UserConfig {
     return { ...this.config };
   }
 
-  updateUserConfig(config: Partial<UserConfig>) {
+  updateUserConfig(config: Partial<UserConfig>): UserConfig {
     Object.assign(this.config, config);
+
+    if (config.presets !== undefined) {
+      this.presetsStorage.save(config.presets);
+
+      if (
+        this.config.defaultPresetName !== undefined &&
+        !this.config.presets.some(
+          (p) => p.name === this.config.defaultPresetName,
+        )
+      ) {
+        const firstPreset = this.config.presets[0];
+        this.config.defaultPresetName =
+          firstPreset !== undefined ? firstPreset.name : undefined;
+        this.settingsStorage.save({
+          defaultPresetName: this.config.defaultPresetName,
+        });
+      }
+    }
+
+    if (config.defaultPresetName !== undefined) {
+      this.settingsStorage.save({
+        defaultPresetName: config.defaultPresetName,
+      });
+    }
+
+    this.saveProjectConfig();
+    this.sdk.api.send("config:updated", this.currentProjectId);
+
     return this.config;
   }
 }

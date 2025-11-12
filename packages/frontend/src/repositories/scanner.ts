@@ -35,6 +35,11 @@ export const useScannerRepository = () => {
     return response;
   };
 
+  const rerunScanSession = async (sessionId: string) => {
+    const response = await sdk.backend.rerunScanSession(sessionId);
+    return response;
+  };
+
   return {
     startActiveScan,
     getScanSession,
@@ -42,5 +47,6 @@ export const useScannerRepository = () => {
     cancelScanSession,
     deleteScanSession,
     updateSessionTitle,
+    rerunScanSession,
   };
 };
