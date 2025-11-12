@@ -15,20 +15,20 @@
     "generate:parsers": "pnpm -r run generate:parsers"
   },
   "devDependencies": {
-    "@caido-community/dev": "^0.1.6",
-    "@caido/eslint-config": "^0.6.0",
-    "@caido/sdk-backend": "^0.53.1",
+    "@caido-community/dev": "0.1.6",
+    "@caido/eslint-config": "0.6.0",
+    "@caido/sdk-backend": "0.53.1",
     "@caido/tailwindcss": "0.0.1",
-    "@types/node": "^24.10.0",
+    "@types/node": "24.10.0",
     "@vitejs/plugin-vue": "6.0.1",
-    "@vitest/ui": "^3.2.3",
-    "eslint": "^9.31.0",
+    "@vitest/ui": "3.2.3",
+    "eslint": "9.31.0",
     "postcss-prefixwrap": "1.57.0",
-    "rollup-plugin-dts": "^6.2.3",
+    "rollup-plugin-dts": "6.2.3",
     "tailwindcss": "3.4.13",
     "tailwindcss-primeui": "0.6.1",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.5",
-    "vitest": "^3.2.3"
+    "typescript": "5.8.3",
+    "vite": "6.3.5",
+    "vitest": "3.2.3"
   }
 }
