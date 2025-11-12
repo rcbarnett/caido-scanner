@@ -7,6 +7,9 @@ import type {
 import { create } from "mutative";
 import type { CheckExecution, Session } from "shared";
 
+import { SessionsStorage } from "../storage/sessions";
+import { type BackendSDK } from "../types";
+
 export class ScannerStore {
   private static instance?: ScannerStore;
 

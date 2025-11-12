@@ -81,7 +81,7 @@ const onDownloadTrace = () => {
         @click="onCancel"
       />
 
-     <Button
+      <Button
         v-if="hasExecutionTrace"
         label="Download Trace"
         severity="contrast"
