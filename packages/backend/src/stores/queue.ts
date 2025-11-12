@@ -1,25 +1,26 @@
-import { type ScanRunnable } from "engine";
-import { type QueueTask } from "shared";
+import type { ScanRunnable } from "engine";
+import type { QueueTask } from "shared";
 
-import { type TaskQueue } from "../utils/task-queue";
+import type { TaskQueue } from "../utils/task-queue";
 
 export class QueueStore {
-  private static _store?: QueueStore;
+  private static instance?: QueueStore;
 
-  private tasks: QueueTask[] = [];
-  private cancelFunctions: Map<string, () => void> = new Map();
+  private tasks: QueueTask[];
+  private cancelFunctions: Map<string, () => void>;
   private passiveTaskQueue?: TaskQueue;
 
   private constructor() {
     this.tasks = [];
+    this.cancelFunctions = new Map();
   }
 
   static get(): QueueStore {
-    if (!QueueStore._store) {
-      QueueStore._store = new QueueStore();
+    if (!QueueStore.instance) {
+      QueueStore.instance = new QueueStore();
     }
 
-    return QueueStore._store;
+    return QueueStore.instance;
   }
 
   setPassiveTaskQueue(queue: TaskQueue): void {
@@ -50,7 +51,7 @@ export class QueueStore {
     status: QueueTask["status"],
   ): QueueTask | undefined {
     const task = this.tasks.find((t) => t.id === id);
-    if (task) {
+    if (task !== undefined) {
       task.status = status;
     }
     return task;
@@ -75,10 +76,10 @@ export class QueueStore {
   }
 
   clearTasks(): void {
-    for (const [id, cancelFunction] of this.cancelFunctions.entries()) {
+    for (const cancelFunction of this.cancelFunctions.values()) {
       cancelFunction();
-      this.cancelFunctions.delete(id);
     }
+    this.cancelFunctions.clear();
 
     this.passiveTaskQueue?.clear();
     this.tasks = [];

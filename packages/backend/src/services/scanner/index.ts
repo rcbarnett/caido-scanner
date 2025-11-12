@@ -4,6 +4,7 @@ export {
   cancelScanSession,
   deleteScanSession,
   updateSessionTitle,
+  rerunScanSession,
 } from "./sessions";
 
 export { startActiveScan } from "./execution";

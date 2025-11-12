@@ -12,6 +12,7 @@ import {
   deleteScanSession,
   getScanSession,
   getScanSessions,
+  rerunScanSession,
   startActiveScan,
   updateSessionTitle,
 } from "./services/scanner";
@@ -47,9 +48,10 @@ export type API = DefineAPI<{
   getRequestResponse: typeof getRequestResponse;
   updateSessionTitle: typeof updateSessionTitle;
   getExecutionTrace: typeof getExecutionTrace;
+  rerunScanSession: typeof rerunScanSession;
 }>;
 
-export function init(sdk: BackendSDK) {
+export async function init(sdk: BackendSDK) {
   sdk.api.register("getChecks", getChecks);
   sdk.api.register("getUserConfig", getUserConfig);
   sdk.api.register("updateUserConfig", updateUserConfig);
@@ -64,12 +66,18 @@ export function init(sdk: BackendSDK) {
   sdk.api.register("getRequestResponse", getRequestResponse);
   sdk.api.register("updateSessionTitle", updateSessionTitle);
   sdk.api.register("getExecutionTrace", getExecutionTrace);
+  sdk.api.register("rerunScanSession", rerunScanSession);
 
   const checksStore = ChecksStore.get();
   checksStore.register(...checks);
 
   const configStore = ConfigStore.get();
+  const scannerStore = ScannerStore.get();
   const queueStore = QueueStore.get();
+
+  await configStore.initialize(sdk);
+  await scannerStore.initialize(sdk);
+
   const config = configStore.getUserConfig();
   const passiveTaskQueue = new TaskQueue(config.passive.concurrentChecks);
   queueStore.setPassiveTaskQueue(passiveTaskQueue);
@@ -153,6 +161,15 @@ export function init(sdk: BackendSDK) {
         sdk.api.send("passive:queue-finished", passiveTaskID);
       }
     });
+  });
+
+  sdk.events.onProjectChange(async (sdk, project) => {
+    const projectId = project?.getId();
+
+    await configStore.switchProject(projectId);
+    await scannerStore.switchProject(projectId);
+
+    sdk.api.send("project:changed", projectId);
   });
 }
 

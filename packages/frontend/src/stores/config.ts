@@ -86,8 +86,10 @@ const processSuccess = (
       };
 
     case "Start":
-    case "Error":
+      return { type: "Loading" };
     case "Success":
+      return { type: "Success", config: message.config };
+    case "Error":
       return state;
   }
 };

@@ -61,4 +61,6 @@ export type BackendEvents = DefineEvents<{
   "passive:queue-new": (taskID: string, requestID: string) => void;
   "passive:queue-started": (taskID: string) => void;
   "passive:queue-finished": (taskID: string) => void;
+  "project:changed": (projectID: string | undefined) => void;
+  "config:updated": (projectID: string | undefined) => void;
 }>;

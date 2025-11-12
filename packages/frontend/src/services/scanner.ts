@@ -62,6 +62,17 @@ export const useScannerService = defineStore("services.scanner", () => {
     sdk.backend.onEvent("session:progress", (id, progress) => {
       throttledProgressUpdate(id, progress);
     });
+
+    sdk.backend.onEvent("project:changed", async () => {
+      store.send({ type: "Start" });
+      const result = await repository.getScanSessions();
+
+      if (result.kind === "Success") {
+        store.send({ type: "Success", sessions: result.value });
+      } else {
+        store.send({ type: "Error", error: result.error });
+      }
+    });
   };
 
   const startActiveScan = async (payload: ScanRequestPayload) => {
@@ -132,7 +143,6 @@ export const useScannerService = defineStore("services.scanner", () => {
     const result = await repository.getExecutionTrace(sessionId);
     switch (result.kind) {
       case "Success": {
-        // Create a blob with the trace data and trigger download
         const blob = new Blob([result.value], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -149,6 +159,19 @@ export const useScannerService = defineStore("services.scanner", () => {
     }
   };
 
+  const rerunScanSession = async (sessionId: string) => {
+    const result = await repository.rerunScanSession(sessionId);
+    switch (result.kind) {
+      case "Success":
+        sdk.window.showToast("Scan restarted", { variant: "success" });
+        selectSession(result.value.id);
+        break;
+      case "Error":
+        sdk.window.showToast(result.error, { variant: "error" });
+    }
+    return result;
+  };
+
   const selectedSession = computed(() => getSelectedSession());
 
   return {
@@ -163,5 +186,6 @@ export const useScannerService = defineStore("services.scanner", () => {
     deleteScanSession,
     updateSessionTitle,
     downloadExecutionTrace,
+    rerunScanSession,
   };
 });

@@ -66,14 +66,20 @@ export const init = (sdk: FrontendSDK) => {
             query: request.query,
           });
         });
-      } else if (context.type === "RequestContext" && context.request.id) {
-        requests.push({
-          id: context.request.id.toString(),
-          host: context.request.host,
-          port: context.request.port,
-          path: context.request.path,
-          query: context.request.query,
-        });
+      } else if (context.type === "RequestContext") {
+        const request = context.request;
+        if (request.type === "RequestFull") {
+          requests.push({
+            id: request.id.toString(),
+            host: request.host,
+            port: request.port,
+            path: request.path,
+            query: request.query,
+          });
+        } else {
+          sdk.window.showToast("No requests selected", { variant: "warning" });
+          return;
+        }
       } else {
         sdk.window.showToast("No requests selected", { variant: "warning" });
         return;
@@ -123,10 +129,13 @@ export const init = (sdk: FrontendSDK) => {
     },
     group: "Scanner",
     when: (context) => {
-      return (
-        context.type === "RequestRowContext" ||
-        (context.type === "RequestContext" && context.request.id !== undefined)
-      );
+      if (context.type === "RequestRowContext") {
+        return true;
+      }
+      if (context.type === "RequestContext") {
+        return context.request.type === "RequestFull";
+      }
+      return false;
     },
   });
 

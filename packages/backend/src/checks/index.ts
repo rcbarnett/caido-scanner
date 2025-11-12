@@ -32,6 +32,7 @@ import sqlStatementInParams from "./sql-statement-in-params";
 import ssnDisclosureScan from "./ssn-disclosure";
 import sstiScan from "./ssti";
 import suspectTransformScan from "./suspect-transform";
+import userAgentDependentResponseScan from "./user-agent-dependent-response";
 
 export type CheckID = (typeof Checks)[keyof typeof Checks];
 export const Checks = {
@@ -71,6 +72,7 @@ export const Checks = {
   SQL_STATEMENT_IN_PARAMS: "sql-statement-in-params",
   SSN_DISCLOSURE: "ssn-disclosure",
   SUSPECT_TRANSFORM: "suspect-transform",
+  USER_AGENT_DEPENDENT_RESPONSE: "user-agent-dependent-response",
   // MYSQL_TIME_BASED_SQLI: "mysql-time-based-sqli" - TODO: fix false positives
 } as const;
 
@@ -111,5 +113,6 @@ export const checks = [
   sqlStatementInParams,
   ssnDisclosureScan,
   suspectTransformScan,
+  userAgentDependentResponseScan,
   // mysqlTimeBased,
 ] as const;

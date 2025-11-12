@@ -16,20 +16,23 @@ import {
  * - for passive scans, all passive checks are enabled
  * Overrides are used to force enable or disable checks.
  */
-export type UserConfig = {
-  passive: {
-    enabled: boolean;
-    aggressivity: ScanAggressivity;
-    inScopeOnly: boolean;
-    concurrentChecks: number;
-    concurrentRequests: number;
-    overrides: Override[];
-    severities: Severity[];
-  };
-  active: {
-    overrides: Override[];
-  };
-  presets: Preset[];
+export type PassiveConfig = {
+  enabled: boolean;
+  aggressivity: ScanAggressivity;
+  inScopeOnly: boolean;
+  concurrentChecks: number;
+  concurrentRequests: number;
+  overrides: Override[];
+  severities: Severity[];
+};
+
+export type ActiveConfig = {
+  overrides: Override[];
+};
+
+export type Override = {
+  enabled: boolean;
+  checkID: string;
 };
 
 export type Preset = {
@@ -38,9 +41,11 @@ export type Preset = {
   passive: Override[];
 };
 
-export type Override = {
-  enabled: boolean;
-  checkID: string;
+export type UserConfig = {
+  passive: PassiveConfig;
+  active: ActiveConfig;
+  presets: Preset[];
+  defaultPresetName?: string;
 };
 
 export type SelectOptions = {
@@ -115,7 +120,14 @@ export type SessionProgress = {
 };
 
 export type Session =
-  | { kind: "Pending"; id: string; createdAt: number; title: string }
+  | {
+      kind: "Pending";
+      id: string;
+      createdAt: number;
+      title: string;
+      requestIDs: string[];
+      scanConfig: ScanConfig;
+    }
   | {
       kind: "Running";
       id: string;
@@ -123,6 +135,8 @@ export type Session =
       createdAt: number;
       startedAt: number;
       progress: SessionProgress;
+      requestIDs: string[];
+      scanConfig: ScanConfig;
     }
   | {
       kind: "Done";
@@ -133,6 +147,8 @@ export type Session =
       finishedAt: number;
       progress: SessionProgress;
       hasExecutionTrace: boolean;
+      requestIDs: string[];
+      scanConfig: ScanConfig;
     }
   | {
       kind: "Interrupted";
@@ -143,6 +159,8 @@ export type Session =
       progress: SessionProgress;
       reason: InterruptReason;
       hasExecutionTrace: boolean;
+      requestIDs: string[];
+      scanConfig: ScanConfig;
     }
   | {
       kind: "Error";
@@ -151,6 +169,8 @@ export type Session =
       createdAt: number;
       error: string;
       hasExecutionTrace: boolean;
+      requestIDs: string[];
+      scanConfig: ScanConfig;
     };
 
 export type ScanRequestPayload = {

@@ -39,7 +39,11 @@ export const startActiveScan = (
   }
 
   const scannerStore = ScannerStore.get();
-  const initialSession = scannerStore.createSession(title);
+  const initialSession = scannerStore.createSession(
+    title,
+    requestIDs,
+    scanConfig,
+  );
 
   (async () => {
     const { id } = initialSession;

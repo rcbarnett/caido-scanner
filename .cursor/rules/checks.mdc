@@ -264,7 +264,7 @@ step("testOpenRedirect", async (state, context) => {
 
 ### Add to Presets
 
-- Update `packages/backend/src/stores/config.ts` to include the check in default presets.
+- Update `packages/backend/src/stores/presets/*.ts` to include the check in default presets.
 
 Light Preset:
 
@@ -275,6 +275,11 @@ Balanced Preset:
 
 - usually we want to enable it in the active part, unless it's very resource-heavy
 - enable in passive part only if it sends a few basic requests and doesn't do resource-heavy things
+
+Bug Bounty Preset:
+
+- usually we want to enable it in the active part, unless it's very resource-heavy
+- enable in passive part ONLY if finding is valuable for a Bug Bounty hunter. Examples: CSP/cookie findings would be disabled, but Open Redirect or XSS are juicy and bug bounty hunters want to test those.
 
 Heavy Preset:
 
