@@ -11,9 +11,9 @@ import type { BackendSDK } from "../types";
 
 import {
   BALANCED_PRESET,
+  BUGBOUNTY_PRESET,
   HEAVY_PRESET,
   LIGHT_PRESET,
-  BUGBOUNTY_PRESET,
 } from "./presets";
 
 const createDefaultPassiveConfig = (): PassiveConfig => ({
@@ -132,7 +132,7 @@ export class ConfigStore {
 
     if (this.config.defaultPresetName !== undefined) {
       const preset = this.config.presets.find(
-        (p) => p.name === this.config.defaultPresetName
+        (p) => p.name === this.config.defaultPresetName,
       );
       if (preset !== undefined) {
         return preset;
@@ -174,7 +174,7 @@ export class ConfigStore {
       if (
         this.config.defaultPresetName !== undefined &&
         !this.config.presets.some(
-          (p) => p.name === this.config.defaultPresetName
+          (p) => p.name === this.config.defaultPresetName,
         )
       ) {
         const firstPreset = this.config.presets[0];
