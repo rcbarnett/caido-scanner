@@ -47,6 +47,7 @@ export type API = DefineAPI<{
   deleteScanSession: typeof deleteScanSession;
   getRequestResponse: typeof getRequestResponse;
   updateSessionTitle: typeof updateSessionTitle;
+  getExecutionTrace: typeof getExecutionTrace;
   rerunScanSession: typeof rerunScanSession;
 }>;
 
@@ -64,6 +65,7 @@ export async function init(sdk: BackendSDK) {
   sdk.api.register("deleteScanSession", deleteScanSession);
   sdk.api.register("getRequestResponse", getRequestResponse);
   sdk.api.register("updateSessionTitle", updateSessionTitle);
+  sdk.api.register("getExecutionTrace", getExecutionTrace);
   sdk.api.register("rerunScanSession", rerunScanSession);
 
   const checksStore = ChecksStore.get();
@@ -207,6 +209,25 @@ export const getRequestResponse = async (
       raw: response.getRaw().toText(),
     },
   });
+};
+
+export const getExecutionTrace = (
+  sdk: BackendSDK,
+  sessionId: string,
+): Result<string> => {
+  const validation = validateInput(IdSchema, sessionId);
+  if (validation.kind === "Error") {
+    return validation;
+  }
+
+  const scannerStore = ScannerStore.get();
+  const trace = scannerStore.getExecutionTrace(validation.value);
+
+  if (trace === undefined) {
+    return error("Execution trace not found");
+  }
+
+  return ok(trace);
 };
 
 const Uint8ArrayToString = (data: Uint8Array) => {

@@ -2,8 +2,11 @@
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import { type Session } from "shared";
+import { computed } from "vue";
 
 import { useForm } from "./useForm";
+
+import { useScannerService } from "@/services/scanner";
 
 const props = defineProps<{
   session: Session;
@@ -24,6 +27,20 @@ const {
   showDeleteDialog,
   showRerunDialog,
 } = useForm(props);
+
+const scannerService = useScannerService();
+
+const hasExecutionTrace = computed(() => {
+  if (props.session.kind === "Done" || props.session.kind === "Interrupted") {
+    return props.session.hasExecutionTrace;
+  }
+
+  return false;
+});
+
+const onDownloadTrace = () => {
+  scannerService.downloadExecutionTrace(props.session.id);
+};
 </script>
 
 <template>
@@ -62,6 +79,16 @@ const {
         outlined
         size="small"
         @click="onCancel"
+      />
+
+      <Button
+        v-if="hasExecutionTrace"
+        label="Download Trace"
+        severity="contrast"
+        outlined
+        size="small"
+        icon="fas fa-download"
+        @click="onDownloadTrace"
       />
 
       <Button

@@ -1,0 +1,131 @@
+<script setup lang="ts">
+import Card from "primevue/card";
+import Column from "primevue/column";
+import DataTable, { type DataTableRowClickEvent } from "primevue/datatable";
+import Tag from "primevue/tag";
+import { computed } from "vue";
+
+import { useTrace } from "@/composables/useTrace";
+import { type CheckExecutionRecord } from "@/types";
+
+const { parsedTrace, selectCheck } = useTrace();
+
+const executionHistoryWithFindingsCount = computed(() => {
+  return parsedTrace.value.executionHistory.map((check) => ({
+    ...check,
+    findingsCount: getFindingsCount(check),
+  }));
+});
+
+const getSeverityColor = (status: string) => {
+  return status === "completed" ? "success" : "danger";
+};
+
+const onRowSelect = (event: DataTableRowClickEvent) => {
+  const index = parsedTrace.value.executionHistory.findIndex(
+    (check) =>
+      check.checkId === event.data.checkId &&
+      check.targetRequestId === event.data.targetRequestId,
+  );
+  if (index !== -1) {
+    selectCheck(index);
+  }
+};
+
+const getFindingsCount = (check: CheckExecutionRecord) => {
+  return check.steps.reduce((sum, step) => sum + step.findings.length, 0);
+};
+</script>
+
+<template>
+  <div class="flex flex-col min-h-0">
+    <Card
+      class="h-full"
+      :pt="{ content: 'min-h-0 flex flex-col', body: 'flex flex-col h-full' }"
+    >
+      <template #title>
+        <div class="px-4 py-4">
+          <h2 class="text-lg font-semibold text-surface-0">Checks</h2>
+          <p class="text-sm text-surface-300">
+            {{ parsedTrace.totalChecks }} checks,
+            {{ parsedTrace.totalSteps }} steps,
+            {{ parsedTrace.totalFindings }} findings
+          </p>
+        </div>
+      </template>
+
+      <template #content>
+        <div class="flex-1 overflow-hidden">
+          <DataTable
+            :value="executionHistoryWithFindingsCount"
+            selection-mode="single"
+            data-key="checkId"
+            scroll-height="flex"
+            scrollable
+            @row-click="onRowSelect"
+          >
+            <Column field="checkId" header="Check ID">
+              <template #body="{ data }">
+                <div class="font-medium text-surface-0">{{ data.checkId }}</div>
+              </template>
+            </Column>
+
+            <Column field="targetRequestId" header="Target Request">
+              <template #body="{ data }">
+                <div class="text-sm text-surface-300">
+                  {{ data.targetRequestId }}
+                </div>
+              </template>
+            </Column>
+
+            <Column field="status" header="Status">
+              <template #body="{ data }">
+                <Tag
+                  :value="data.status"
+                  :severity="getSeverityColor(data.status)"
+                />
+              </template>
+            </Column>
+
+            <Column field="steps.length" header="Steps">
+              <template #body="{ data }">
+                <div class="text-sm text-surface-300">
+                  {{ data.steps.length }}
+                </div>
+              </template>
+            </Column>
+
+            <Column field="findingsCount" header="Findings">
+              <template #body="{ data }">
+                <div class="text-sm text-surface-300">
+                  {{ getFindingsCount(data) }}
+                </div>
+              </template>
+            </Column>
+
+            <Column
+              v-if="
+                parsedTrace.executionHistory.some((c) => c.status === 'failed')
+              "
+              header="Error"
+            >
+              <template #body="{ data }">
+                <div
+                  v-if="data.status === 'failed'"
+                  class="text-sm text-red-400 truncate max-w-xs"
+                >
+                  {{ data.error.message }}
+                </div>
+                <div v-else class="text-sm text-surface-400">-</div>
+              </template>
+            </Column>
+          </DataTable>
+        </div>
+      </template>
+
+      <template #footer>
+        <div class="px-4 py-4"></div>
+      </template>
+    </Card>
+  </div>
+</template>

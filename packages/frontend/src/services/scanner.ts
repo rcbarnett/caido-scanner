@@ -139,6 +139,26 @@ export const useScannerService = defineStore("services.scanner", () => {
     }
   };
 
+  const downloadExecutionTrace = async (sessionId: string) => {
+    const result = await repository.getExecutionTrace(sessionId);
+    switch (result.kind) {
+      case "Success": {
+        const blob = new Blob([result.value], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `execution-trace-${sessionId}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        break;
+      }
+      case "Error":
+        sdk.window.showToast(result.error, { variant: "error" });
+    }
+  };
+
   const rerunScanSession = async (sessionId: string) => {
     const result = await repository.rerunScanSession(sessionId);
     switch (result.kind) {
@@ -165,6 +185,7 @@ export const useScannerService = defineStore("services.scanner", () => {
     cancelScanSession,
     deleteScanSession,
     updateSessionTitle,
+    downloadExecutionTrace,
     rerunScanSession,
   };
 });

@@ -146,6 +146,7 @@ export type Session =
       startedAt: number;
       finishedAt: number;
       progress: SessionProgress;
+      hasExecutionTrace: boolean;
       requestIDs: string[];
       scanConfig: ScanConfig;
     }
@@ -157,6 +158,7 @@ export type Session =
       startedAt: number;
       progress: SessionProgress;
       reason: InterruptReason;
+      hasExecutionTrace: boolean;
       requestIDs: string[];
       scanConfig: ScanConfig;
     }
@@ -166,6 +168,7 @@ export type Session =
       title: string;
       createdAt: number;
       error: string;
+      hasExecutionTrace: boolean;
       requestIDs: string[];
       scanConfig: ScanConfig;
     };

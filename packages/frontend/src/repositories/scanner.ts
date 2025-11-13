@@ -35,6 +35,11 @@ export const useScannerRepository = () => {
     return response;
   };
 
+  const getExecutionTrace = async (sessionId: string) => {
+    const response = await sdk.backend.getExecutionTrace(sessionId);
+    return response;
+  };
+
   const rerunScanSession = async (sessionId: string) => {
     const response = await sdk.backend.rerunScanSession(sessionId);
     return response;
@@ -47,6 +52,7 @@ export const useScannerRepository = () => {
     cancelScanSession,
     deleteScanSession,
     updateSessionTitle,
+    getExecutionTrace,
     rerunScanSession,
   };
 };
