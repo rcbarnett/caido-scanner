@@ -19,6 +19,7 @@ import exposedEnvScan from "./exposed-env";
 import gitConfigScan from "./git-config";
 import hashDisclosureScan from "./hash-disclosure";
 import jsonHtmlResponseScan from "./json-html-response";
+import linkManipulationScan from "./link-manipulation";
 import missingContentTypeScan from "./missing-content-type";
 import openRedirectScan from "./open-redirect";
 import pathTraversalScan from "./path-traversal";
@@ -59,6 +60,7 @@ export const Checks = {
   GIT_CONFIG: "git-config",
   HASH_DISCLOSURE: "hash-disclosure",
   JSON_HTML_RESPONSE: "json-html-response",
+  LINK_MANIPULATION: "link-manipulation",
   MISSING_CONTENT_TYPE: "missing-content-type",
   OPEN_REDIRECT: "open-redirect",
   PATH_TRAVERSAL: "path-traversal",
@@ -100,6 +102,7 @@ export const checks = [
   gitConfigScan,
   hashDisclosureScan,
   jsonHtmlResponseScan,
+  linkManipulationScan,
   missingContentTypeScan,
   openRedirectScan,
   pathTraversalScan,

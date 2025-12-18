@@ -144,6 +144,10 @@ export const BALANCED_PRESET: Preset = {
       enabled: false,
     },
     {
+      checkID: Checks.LINK_MANIPULATION,
+      enabled: true,
+    },
+    {
       checkID: Checks.PRIVATE_IP_DISCLOSURE,
       enabled: true,
     },
