@@ -4,7 +4,7 @@ import type { BackendSDK } from "../types";
 
 import { BaseStorage } from "./base";
 
-export type UserSettings = {
+type UserSettings = {
   defaultPresetName?: string;
 };
 

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { ScanAggressivitySchema, SeveritySchema } from "./common";
 
-export const ScanConfigSchema = z.object({
+const ScanConfigSchema = z.object({
   aggressivity: ScanAggressivitySchema,
   inScopeOnly: z.boolean(),
   concurrentChecks: z.number().int().min(1).max(100),

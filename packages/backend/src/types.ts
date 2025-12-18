@@ -19,6 +19,7 @@ export const Tags = {
   FORM_ACTION: "form-action",
   FORM_HIJACKING: "form-hijacking",
   FRAME_ANCESTORS: "frame-ancestors",
+  GRAPHQL: "graphql",
   HASH: "hash",
   HTTPONLY: "httponly",
   INFORMATION_DISCLOSURE: "information-disclosure",

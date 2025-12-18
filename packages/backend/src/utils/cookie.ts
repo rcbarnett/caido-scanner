@@ -1,6 +1,6 @@
 import type { Response } from "caido:utils";
 
-export type SetCookieHeader = {
+type SetCookieHeader = {
   key: string;
   value: string;
   isHttpOnly: boolean;

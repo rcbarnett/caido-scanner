@@ -12,27 +12,27 @@ import {
 import { createTestSdk } from "./mocks/sdk";
 import { type MockRequestResponsePair, type SendHandler } from "./mocks/types";
 
-export const runCheck = async (
-  checkDefinition: Check,
-  requestResponsePairs: { request: Request; response?: Response }[],
-  options?: {
-    config?: Partial<ScanConfig>;
-    sendHandler?: SendHandler;
-  },
-): Promise<ExecutionHistory> => {
-  const fullConfig: ScanConfig = {
-    aggressivity: ScanAggressivity.MEDIUM,
-    inScopeOnly: false,
-    concurrentChecks: 1,
-    concurrentRequests: 1,
-    concurrentTargets: 1,
-    requestsDelayMs: 0,
-    scanTimeout: 30000,
-    checkTimeout: 10000,
-    severities: ["info", "low", "medium", "high", "critical"],
-    ...options?.config,
-  };
+type RunCheckOptions = {
+  config?: Partial<ScanConfig>;
+  sendHandler?: SendHandler;
+};
 
+const createFullConfig = (options?: RunCheckOptions): ScanConfig => ({
+  aggressivity: ScanAggressivity.MEDIUM,
+  inScopeOnly: false,
+  concurrentChecks: 1,
+  concurrentRequests: 1,
+  concurrentTargets: 1,
+  requestsDelayMs: 0,
+  scanTimeout: 30000,
+  checkTimeout: 10000,
+  severities: ["info", "low", "medium", "high", "critical"],
+  ...options?.config,
+});
+
+const createRequestsMap = (
+  requestResponsePairs: { request: Request; response?: Response }[],
+): Record<string, MockRequestResponsePair> => {
   const requests: Record<string, MockRequestResponsePair> = {};
 
   for (const pair of requestResponsePairs) {
@@ -61,6 +61,17 @@ export const runCheck = async (
     };
   }
 
+  return requests;
+};
+
+export const runCheck = async (
+  checkDefinition: Check,
+  requestResponsePairs: { request: Request; response?: Response }[],
+  options?: RunCheckOptions,
+): Promise<ExecutionHistory> => {
+  const fullConfig = createFullConfig(options);
+  const requests = createRequestsMap(requestResponsePairs);
+
   const testSdk = createTestSdk({
     requests,
     sendHandler: options?.sendHandler,
@@ -77,6 +88,34 @@ export const runCheck = async (
   const requestIDs = requestResponsePairs.map((pair) => pair.request.getId());
   await runnable.run(requestIDs);
 
-  const executionHistory = runnable.getExecutionHistory();
-  return executionHistory;
+  return runnable.getExecutionHistory();
+};
+
+export const runChecks = async (
+  checkDefinitions: Check[],
+  requestResponsePairs: { request: Request; response?: Response }[],
+  options?: RunCheckOptions,
+): Promise<ExecutionHistory> => {
+  const fullConfig = createFullConfig(options);
+  const requests = createRequestsMap(requestResponsePairs);
+
+  const testSdk = createTestSdk({
+    requests,
+    sendHandler: options?.sendHandler,
+  });
+
+  const registry = createRegistry();
+  for (const checkDefinition of checkDefinitions) {
+    registry.register(checkDefinition);
+  }
+
+  const runnable = registry.create(
+    testSdk as unknown as SDK<object, object>,
+    fullConfig,
+  );
+
+  const requestIDs = requestResponsePairs.map((pair) => pair.request.getId());
+  await runnable.run(requestIDs);
+
+  return runnable.getExecutionHistory();
 };

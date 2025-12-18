@@ -12,7 +12,7 @@ import {
   ScanRunnableInterruptedError,
 } from "./errors";
 
-export type TaskExecutionResult =
+type TaskExecutionResult =
   | {
       status: "done" | "continue";
       findings?: Finding[];
@@ -25,13 +25,13 @@ export type TaskExecutionResult =
       errorMessage: string;
     };
 
-export type TaskExecutorOptions = {
+type TaskExecutorOptions = {
   emit: <T extends keyof ScanEvents>(event: T, data: ScanEvents[T]) => void;
   getInterruptReason: () => InterruptReason | undefined;
   recordStepExecution: (record: StepExecutionRecord) => void;
 };
 
-export type TaskExecutor = {
+type TaskExecutor = {
   tickUntilDone: (task: CheckTask) => Promise<TaskExecutionResult>;
 };
 

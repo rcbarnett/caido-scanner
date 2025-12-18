@@ -1,6 +1,6 @@
 import { type RuntimeContext, type ScanTarget } from "engine";
 
-export type ParameterSource = "query" | "body" | "header";
+type ParameterSource = "query" | "body" | "header";
 
 export type Parameter = {
   name: string;

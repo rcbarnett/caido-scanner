@@ -3,8 +3,6 @@ import { type InterruptReason } from "../types/runner";
 export enum CheckDefinitionErrorCode {
   NO_STEPS_DEFINED = "NO_STEPS_DEFINED",
   STEP_NOT_FOUND = "STEP_NOT_FOUND",
-  INVALID_METADATA = "INVALID_METADATA",
-  INVALID_STATE = "INVALID_STATE",
   INVALID_SEVERITY = "INVALID_SEVERITY",
   NO_NEXT_STEP = "NO_NEXT_STEP",
 }
