@@ -106,6 +106,44 @@ describe("extractParameters", () => {
         { name: "special", value: "<script>", source: "query" },
       ]);
     });
+
+    it("should extract parameters without values", () => {
+      const request = createMockRequest({
+        id: "1",
+        host: "example.com",
+        method: "GET",
+        path: "/page",
+        query: "debug&verbose&trace",
+      });
+
+      const context = createContext(request);
+      const parameters = extractParameters(context);
+
+      expect(parameters).toEqual([
+        { name: "debug", value: "", source: "query" },
+        { name: "verbose", value: "", source: "query" },
+        { name: "trace", value: "", source: "query" },
+      ]);
+    });
+
+    it("should extract mixed query parameters", () => {
+      const request = createMockRequest({
+        id: "1",
+        host: "example.com",
+        method: "GET",
+        path: "/page",
+        query: "debug&foo=bar&verbose",
+      });
+
+      const context = createContext(request);
+      const parameters = extractParameters(context);
+
+      expect(parameters).toEqual([
+        { name: "debug", value: "", source: "query" },
+        { name: "foo", value: "bar", source: "query" },
+        { name: "verbose", value: "", source: "query" },
+      ]);
+    });
   });
 
   describe("body parameters (form)", () => {
