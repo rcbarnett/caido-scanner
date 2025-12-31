@@ -80,7 +80,7 @@ function extractQueryParameters(queryString: string): Parameter[] {
   const urlParams = new URLSearchParams(queryString);
 
   for (const [name, value] of urlParams.entries()) {
-    if (name && value) {
+    if (name !== "") {
       parameters.push({ name, value, source: "query" });
     }
   }
@@ -97,7 +97,7 @@ function extractBodyParameters(
   if (contentType === "form") {
     const bodyParams = new URLSearchParams(body);
     for (const [name, value] of bodyParams.entries()) {
-      if (name && value) {
+      if (name !== "") {
         parameters.push({ name, value, source: "body" });
       }
     }
