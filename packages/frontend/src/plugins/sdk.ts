@@ -2,7 +2,7 @@ import { getCurrentInstance, inject, type Plugin, provide } from "vue";
 
 import type { FrontendSDK } from "@/types";
 
-export const KEY = "sdk";
+const KEY = "sdk";
 
 export const SDKPlugin: Plugin = (app, sdk: FrontendSDK) => {
   app.provide(KEY, sdk);

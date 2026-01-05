@@ -10,7 +10,7 @@ import {
   SourceValue,
 } from "./__generated__.terms.js";
 
-export type CSPDirective = {
+type CSPDirective = {
   name: string;
   values: string[];
 };

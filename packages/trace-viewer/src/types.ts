@@ -1,4 +1,4 @@
-export const Severity = {
+const Severity = {
   INFO: "info",
   LOW: "low",
   MEDIUM: "medium",
@@ -6,9 +6,9 @@ export const Severity = {
   CRITICAL: "critical",
 } as const;
 
-export type Severity = (typeof Severity)[keyof typeof Severity];
+type Severity = (typeof Severity)[keyof typeof Severity];
 
-export type Finding = {
+type Finding = {
   name: string;
   description: string;
   severity: Severity;
@@ -22,7 +22,7 @@ export type Finding = {
   };
 };
 
-export type CheckOutput = unknown;
+type CheckOutput = unknown;
 
 export type StepExecutionRecord = {
   stepName: string;
@@ -31,7 +31,7 @@ export type StepExecutionRecord = {
   findings: Finding[];
 } & ({ result: "done" } | { result: "continue"; nextStep: string });
 
-export enum ScanRunnableErrorCode {
+enum ScanRunnableErrorCode {
   INTERRUPTED = "INTERRUPTED",
   REQUEST_NOT_FOUND = "REQUEST_NOT_FOUND",
   SCAN_ALREADY_RUNNING = "SCAN_ALREADY_RUNNING",

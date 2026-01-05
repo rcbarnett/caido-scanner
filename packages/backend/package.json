@@ -18,7 +18,6 @@
     "@lezer/generator": "1.8.0",
     "@lezer/lr": "1.4.3",
     "engine": "workspace:*",
-    "mitt": "3.0.1",
     "mutative": "1.3.0",
     "zod": "4.1.12"
   }

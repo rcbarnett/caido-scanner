@@ -17,6 +17,7 @@ import directoryListingScan from "./directory-listing";
 import emailDisclosureScan from "./email-disclosure";
 import exposedEnvScan from "./exposed-env";
 import gitConfigScan from "./git-config";
+import { graphqlContentTypeScan, graphqlEndpointScan } from "./graphql";
 import hashDisclosureScan from "./hash-disclosure";
 import jsonHtmlResponseScan from "./json-html-response";
 import linkManipulationScan from "./link-manipulation";
@@ -35,7 +36,6 @@ import sstiScan from "./ssti";
 import suspectTransformScan from "./suspect-transform";
 import userAgentDependentResponseScan from "./user-agent-dependent-response";
 
-export type CheckID = (typeof Checks)[keyof typeof Checks];
 export const Checks = {
   ANTI_CLICKJACKING: "anti-clickjacking",
   APPLICATION_ERRORS: "application-errors",
@@ -58,6 +58,8 @@ export const Checks = {
   EMAIL_DISCLOSURE: "email-disclosure",
   EXPOSED_ENV: "exposed-env",
   GIT_CONFIG: "git-config",
+  GRAPHQL_CONTENT_TYPE: "graphql-content-type",
+  GRAPHQL_ENDPOINT: "graphql-endpoint",
   HASH_DISCLOSURE: "hash-disclosure",
   JSON_HTML_RESPONSE: "json-html-response",
   LINK_MANIPULATION: "link-manipulation",
@@ -100,6 +102,8 @@ export const checks = [
   emailDisclosureScan,
   exposedEnvScan,
   gitConfigScan,
+  graphqlContentTypeScan,
+  graphqlEndpointScan,
   hashDisclosureScan,
   jsonHtmlResponseScan,
   linkManipulationScan,

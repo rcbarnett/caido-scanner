@@ -42,6 +42,10 @@ export const LIGHT_PRESET: Preset = {
       enabled: true,
     },
     {
+      checkID: Checks.GRAPHQL_CONTENT_TYPE,
+      enabled: false,
+    },
+    {
       checkID: Checks.BASIC_REFLECTED_XSS,
       enabled: false,
     },
@@ -118,6 +122,10 @@ export const LIGHT_PRESET: Preset = {
     {
       checkID: Checks.EMAIL_DISCLOSURE,
       enabled: false,
+    },
+    {
+      checkID: Checks.GRAPHQL_ENDPOINT,
+      enabled: true,
     },
     {
       checkID: Checks.HASH_DISCLOSURE,

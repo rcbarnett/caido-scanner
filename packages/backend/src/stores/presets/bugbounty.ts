@@ -42,6 +42,10 @@ export const BUGBOUNTY_PRESET: Preset = {
       enabled: true,
     },
     {
+      checkID: Checks.GRAPHQL_CONTENT_TYPE,
+      enabled: true,
+    },
+    {
       checkID: Checks.BASIC_REFLECTED_XSS,
       enabled: true,
     },
@@ -105,6 +109,14 @@ export const BUGBOUNTY_PRESET: Preset = {
     },
     {
       checkID: Checks.GIT_CONFIG,
+      enabled: true,
+    },
+    {
+      checkID: Checks.GRAPHQL_CONTENT_TYPE,
+      enabled: true,
+    },
+    {
+      checkID: Checks.GRAPHQL_ENDPOINT,
       enabled: true,
     },
     {

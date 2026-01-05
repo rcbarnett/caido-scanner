@@ -54,6 +54,10 @@ export const BALANCED_PRESET: Preset = {
       enabled: true,
     },
     {
+      checkID: Checks.GRAPHQL_CONTENT_TYPE,
+      enabled: true,
+    },
+    {
       checkID: Checks.PATH_TRAVERSAL,
       enabled: true,
     },
@@ -138,6 +142,10 @@ export const BALANCED_PRESET: Preset = {
     {
       checkID: Checks.EMAIL_DISCLOSURE,
       enabled: false,
+    },
+    {
+      checkID: Checks.GRAPHQL_ENDPOINT,
+      enabled: true,
     },
     {
       checkID: Checks.HASH_DISCLOSURE,
