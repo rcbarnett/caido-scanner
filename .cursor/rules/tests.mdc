@@ -1,0 +1,31 @@
+---
+alwaysApply: true
+---
+
+## Testing Guidelines
+
+Write tests that focus on actual behavior, not implementation details. Test both positive and negative cases with realistic mock data. Use descriptive test names that clearly describe the scenario and expected behavior.
+
+## Critical: Don't Fix Tests to Pass Invalid Behavior
+
+The most common mistake is adjusting tests to pass when the check itself has bugs.
+
+When a test fails:
+1. First, determine if it's a test issue or check issue
+2. If the check behavior is wrong, fix the check, not the test
+3. Only adjust the test if the test expectations were incorrect
+
+It's a CHECK issue when:
+- The check produces false positives (finds vulnerabilities that don't exist)
+- The check produces false negatives (misses real vulnerabilities)
+- The check runs when it shouldn't (wrong conditions)
+- The check doesn't run when it should
+- The findings have incorrect severity or descriptions
+
+It's a TEST issue when:
+- Test expectations don't match the intended check behavior
+- Mock data doesn't properly represent the scenario
+- Test setup is incorrect or incomplete
+- Test assertions are checking the wrong things
+
+Always verify that the check's actual behavior matches what it should do according to the vulnerability it's designed to detect.

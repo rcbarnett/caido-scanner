@@ -124,6 +124,10 @@ export const LIGHT_PRESET: Preset = {
       enabled: false,
     },
     {
+      checkID: Checks.LINK_MANIPULATION,
+      enabled: false,
+    },
+    {
       checkID: Checks.PRIVATE_IP_DISCLOSURE,
       enabled: false,
     },
