@@ -56,6 +56,11 @@ function getChecksForAggressivity(
 
   const allChecks: TransformCheck[] = [
     {
+      name: "unicode combining diacritic",
+      probe: `\u0338${rightAnchor}`,
+      expectedValues: [`\u226F${rightAnchor}`],
+    },
+    {
       name: "unicode normalization",
       probe: `${leftAnchor}\u212a${rightAnchor}`,
       expectedValues: [`${leftAnchor}K${rightAnchor}`],
@@ -74,11 +79,6 @@ function getChecksForAggressivity(
       name: "unicode case conversion",
       probe: `${leftAnchor}\u0131${rightAnchor}`,
       expectedValues: [`${leftAnchor}I${rightAnchor}`],
-    },
-    {
-      name: "unicode combining diacritic",
-      probe: `\u0338${rightAnchor}`,
-      expectedValues: [`\u226F${rightAnchor}`],
     },
     {
       name: "quote consumption",
